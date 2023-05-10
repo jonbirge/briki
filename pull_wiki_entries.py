@@ -8,12 +8,13 @@ import wikipediaapi
 
 
 ### Parameters
-BATCH_SIZE = 128  # number of articles to process at a time
+BATCH_SIZE = 128  # number of articles to process at a time (eventually)
 
 def add_space_after_period(text):
     # Use a regular expression to add a space after every period that's
     # followed by a non-space character or a non-digit character
     return re.sub(r'\.(?=[^\s\d])', '. ', text)
+
 
 ### Create SQLite database and tables, if needed...
 
@@ -37,7 +38,8 @@ cursor.execute('''
 with open('dict_test_valid') as f:
     dict_titles = f.readlines()
 
-# Write each element of dict_titles to the articles table if it doesn't already exist
+
+### Write each element of dict_titles to the articles table if it doesn't already exist
 wiki = wikipediaapi.Wikipedia('en')
 for title in dict_titles:
     # Remove the newline character from the end of the title
