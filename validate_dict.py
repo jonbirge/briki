@@ -55,7 +55,7 @@ print("Number of elements in dict_raw: %d" % len(dict_raw))
 
 ### Validate each entry in dict_raw
 wiki = wikipediaapi.Wikipedia('en')
-dict_valid = []
+valid_set = set()
 for entry in dict_raw:
     # Remove the newline character from the end of the entry
     entry = entry.rstrip('\n')
@@ -65,25 +65,16 @@ for entry in dict_raw:
     print("Checking: %s" % entry)
     new_entries = validated_titles(entry, wiki)
     if len(new_entries) > 0:
-        dict_valid.extend(new_entries)
+        valid_set.update(set(new_entries))
 
-# Print the number of elements in dict_valid
-print("Number of elements in dict_valid: %d" % len(dict_valid))
-
-# Remove duplicates from dict_valid
-# TODO: This is a slow process and should be improved, perhaps by using sets
-def remove_duplicates(array):
-    # Use a list comprehension with an "if x not in" condition to remove duplicates
-    return [x for i, x in enumerate(array) if array.index(x) == i]
-
-print("Removing duplicates...")
-dict_valid = remove_duplicates(dict_valid)
+# Create a sorted list from the set
+dict_valid = list(valid_set)
 dict_valid.sort()
 
 # Print the number of elements in dict_valid
 print("Number of elements in dict_valid: %d" % len(dict_valid))
 
 # Write the validated titles to a file
-with open('dict_test_valid', 'w') as f:
+with open('dict_valid', 'w') as f:
     for entry in dict_valid:
         f.write("%s\n" % entry)
