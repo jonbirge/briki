@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Filter out lines that contain non-ASCII characters
+
 import sys
 
 def filter_ascii_lines():
