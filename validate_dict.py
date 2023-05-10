@@ -8,8 +8,23 @@ import sqlite3
 
 ### Output list of validated titles to a file...
 
+def is_good_title(title):
+    # Check if the title is a good title
+    return (len(title) > 2 and 
+            not title.startswith("Talk:") and
+            not title.startswith("Help:"))
+
+def filter_titles(titles):
+    # Filter out titles that are not good titles
+    titles_filtered = []
+    for line in titles:
+        if is_good_title(line):
+            titles_filtered.append(line)
+    return titles_filtered
+
 def validated_titles(raw_title, wiki):
-    # Check raw_title and return it or a list of validated titles
+    # Check raw_title and return a (potentially empty) list of validated titles
+    # TODO: check for foreign characters or short names
     titles = []
     page = wiki.page(raw_title)
     if page.exists():
@@ -21,7 +36,9 @@ def validated_titles(raw_title, wiki):
         else:
             print("%s is a valid page." % page.title)
             titles.append(page.title)
-    return titles
+
+    # Check for 
+    return filter_titles(titles)
 
 # Read in the file of article titles from stdin, or a default file name if there is not stdin
 if len(sys.argv) > 1:
@@ -36,7 +53,7 @@ with open(file_name) as f:
 # Print the number of elements in dict_raw
 print("Number of elements in dict_raw: %d" % len(dict_raw))
 
-# Validate each entry in dict_raw
+### Validate each entry in dict_raw
 wiki = wikipediaapi.Wikipedia('en')
 dict_valid = []
 for entry in dict_raw:
@@ -61,11 +78,12 @@ def remove_duplicates(array):
 
 print("Removing duplicates...")
 dict_valid = remove_duplicates(dict_valid)
+dict_valid.sort()
 
 # Print the number of elements in dict_valid
 print("Number of elements in dict_valid: %d" % len(dict_valid))
 
 # Write the validated titles to a file
-with open('dict_valid', 'w') as f:
+with open('dict_test_valid', 'w') as f:
     for entry in dict_valid:
         f.write("%s\n" % entry)

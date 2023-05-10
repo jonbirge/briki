@@ -4,13 +4,18 @@
 
 import sys
 
-def filter_ascii_lines():
-    for line in sys.stdin:
+def filter_lines(lines_in):
+    lines_out = []
+    for line in lines_in:
         if len(line) > 3 and not contains_non_ascii(line):
-            sys.stdout.write(line)
+            lines_out.append(line)
+    return lines_out
 
 def contains_non_ascii(s):
     return any(ord(c) > 127 for c in s)
 
 if __name__ == "__main__":
-    filter_ascii_lines()
+    lines_in = sys.stdin.readlines()
+    lines_out = filter_lines(lines_in)
+    lines_out.sort()
+    sys.stdout.writelines(lines_out)
