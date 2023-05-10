@@ -48,7 +48,7 @@ for entry in dict_raw:
     print("Checking: %s" % entry)
     new_entries = validated_titles(entry, wiki)
     if len(new_entries) > 0:
-        dict_valid.append(new_entries)
+        dict_valid.extend(new_entries)
 
 # Print the number of elements in dict_valid
 print("Number of elements in dict_valid: %d" % len(dict_valid))
