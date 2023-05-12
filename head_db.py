@@ -28,6 +28,7 @@ rows = c.fetchall()
 # Print the rows
 for row in rows:
     print(row)
+    print("---")
 
 # Close the connection
 conn.close()

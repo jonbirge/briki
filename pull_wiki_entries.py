@@ -33,16 +33,20 @@ def validated_titles(raw_title):
     # Check raw_title and return a (potentially empty) list of validated titles
     # TODO: check for foreign characters or short names
     titles = []
-    page = wiki.page(raw_title)
-    if page.exists():
-        if "Category:All disambiguation pages" in page.categories:
-            print("%s links to %s, a disambiguation page." % (raw_title, page.title))
-            for link in page.links:
-                titles.append(link)
-            titles = filter_titles(titles)
-        else:
-            print("%s links to %s." % (raw_title, page.title))
-            titles.append(page.title)
+    try:
+        page = wiki.page(raw_title)
+        if page.exists():
+            if "Category:All disambiguation pages" in page.categories:
+                print("%s links to %s, a disambiguation page." % (raw_title, page.title))
+                for link in page.links:
+                    titles.append(link)
+                titles = filter_titles(titles)
+            else:
+                print("%s links to %s." % (raw_title, page.title))
+                titles.append(page.title)
+    except Exception as e:
+        print("*** Error validating %s: %s" % (raw_title, e))
+        titles = []
     return titles
 
 def pull_valid_article(title):
@@ -54,46 +58,52 @@ def pull_valid_article(title):
     row = cursor.fetchone()
     if row is None:  # We don't have this one yet.
         print("Pulling %s into to database..." % title)
-        page = wiki.page(title)
-        contents = add_space_after_period(page.summary)
+        try:
+            page = wiki.page(title)
+            contents = add_space_after_period(page.summary)
 
-        # Get the current data and time
-        date_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Get the current data and time
+            date_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Get links to other pages in the see also section, if it exists
-        if 'See also' in page.sections:
-            see_also = page.sections['See also'].links
-        else:
-            see_also = ''
+            # Get links to other pages in the see also section, if it exists
+            if 'See also' in page.sections:
+                see_also = page.sections['See also'].links
+            else:
+                see_also = ''
 
-        # Insert the title, date_update, contents, see_also, and see_from into the articles table
-        cursor.execute('''
-            INSERT INTO articles(title, date_update, contents, see_also)
-            VALUES(?, ?, ?, ?)''', (title, date_update, contents, see_also))
-        conn.commit()
+            # Insert the title, date_update, contents, see_also, and see_from into the articles table
+            cursor.execute('''
+                INSERT INTO articles(title, date_update, contents, see_also)
+                VALUES(?, ?, ?, ?)''', (title, date_update, contents, see_also))
+            conn.commit()
+        except Exception as e:
+            print("*** Error pulling %s: %s" % (title, e))
     else:
-        print("Skipping %s since it's already in the database.", title)
+        print("Skipping %s since it's already in the database." % title)
 
-def add_title(title):
-    # Add all articles matching title to the articles table,
-    # using wiki as the Wiki object and cursor as the SQL cursor.
-    
-    print("Checking new title %s..." % title)
-    # If the title is not in the articles table, check to see if it's a valid title
-    valid_title_list = validated_titles(title)
-    print("Valid titles: %s" % valid_title_list)
+def add_title(title, depth = 0):
+    # Recursively add articles matching title to the database
+    DEPTH_LIMIT = 6  # maximum depth to recurse
 
-    # Check to see if it's a valid article or redirected
-    if len(valid_title_list) > 0:
-        if len(valid_title_list) == 1:
-            # If it's a valid article, pull it from Wikipedia
-            pull_valid_article(valid_title_list[0])
+    if depth < DEPTH_LIMIT:
+        print("Checking new title %s at depth %d..." % (title, depth))
+        # If the title is not in the articles table, check to see if it's a valid title
+        valid_title_list = filter_titles(validated_titles(title))
+        print("Valid titles: %s" % valid_title_list)
+
+        # Check to see if it's a valid article or redirected
+        if len(valid_title_list) > 0:
+            if len(valid_title_list) == 1:
+                # If it's a valid article, pull it from Wikipedia
+                pull_valid_article(valid_title_list[0])
+            else:
+                # Run add_title on each title in valid_titles
+                for valid_title in valid_title_list:
+                    add_title(valid_title, depth + 1)
         else:
-            # Run add_title on each title in valid_titles
-            for valid_title in valid_title_list:
-                add_title(valid_title)
+            print("No valid titles found for %s." % title)
     else:
-        print("No valid titles found for %s." % title)
+        print("Skipping %s since it's too deep." % title)
 
 
 ### Create SQLite database and tables, if needed...
