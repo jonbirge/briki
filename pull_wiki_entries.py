@@ -98,6 +98,13 @@ def add_title(title):
                 pull_valid_article(valid_title)
 
 
+### Command line handling
+                
+if len(sys.argv) != 2:
+    print("Usage: python pull_wiki_entries.py <filename>")
+    sys.exit(1)
+
+
 ### Create SQLite database and tables, if needed...
 
 # Connect to SQLite database (or create it if it doesn't exist)
@@ -118,11 +125,12 @@ cursor.execute('''
 ### Update the database of definitions for dict_test...
 
 # Read each line of dict_test into an array
-with open('dict_test') as f:
+filename = sys.argv[1]
+with open(filename) as f:
     dict = f.readlines()
 
 # Run through all titles and pull the contents from Wikipedia
-# TODO: Thread this
+# TODO: Parallelize this...
 wiki = wikipediaapi.Wikipedia('en')
 for raw_title in dict:
     # Remove the newline character from the end of the title
