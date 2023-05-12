@@ -34,12 +34,14 @@ cursor.execute('''
         see_also TEXT)
 ''')
                
-# Read each line of dict_test_valid into an array
-with open('dict_test_valid') as f:
-    dict_titles = f.readlines()
-
 
 ### Write each element of dict_titles to the articles table if it doesn't already exist
+
+# Read each line of dict_test_valid into an array
+with open('dict_valid') as f:
+    dict_titles = f.readlines()
+
+# Run through all titles and pull the contents from Wikipedia
 wiki = wikipediaapi.Wikipedia('en')
 for title in dict_titles:
     # Remove the newline character from the end of the title
