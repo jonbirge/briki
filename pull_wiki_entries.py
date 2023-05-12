@@ -8,9 +8,9 @@ import wikipediaapi
 
 
 ### Parameters
-BATCH_SIZE = 128  # number of articles to process at a time (eventually)
+# BATCH_SIZE = 128  # number of articles to process at a time (eventually)
 
-def add_space_after_period(text):
+def clean_summary(text):
     # Use a regular expression to add a space after every period that's
     # followed by a non-space character or a non-digit character
     return re.sub(r'\.(?=[^\s\d])', '. ', text)
@@ -60,16 +60,10 @@ def pull_valid_article(title):
         print("Pulling %s into to database..." % title)
         try:
             page = wiki.page(title)
-            contents = add_space_after_period(page.summary)
+            contents = clean_summary(page.summary)
 
             # Get the current data and time
             date_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            # Get links to other pages in the see also section, if it exists
-            if 'See also' in page.sections:
-                see_also = page.sections['See also'].links
-            else:
-                see_also = ''
 
             # Insert the title, date_update, contents, see_also, and see_from into the articles table
             cursor.execute('''
@@ -81,29 +75,24 @@ def pull_valid_article(title):
     else:
         print("Skipping %s since it's already in the database." % title)
 
-def add_title(title, depth = 0):
-    # Recursively add articles matching title to the database
-    DEPTH_LIMIT = 6  # maximum depth to recurse
+def add_title(title):
+    # Add a title to the articles table from the Wikipedia API, first checking
+    # to see if it's valid or leads to disambiguation
 
-    if depth < DEPTH_LIMIT:
-        print("Checking new title %s at depth %d..." % (title, depth))
-        # If the title is not in the articles table, check to see if it's a valid title
-        valid_title_list = filter_titles(validated_titles(title))
-        print("Valid titles: %s" % valid_title_list)
-
-        # Check to see if it's a valid article or redirected
-        if len(valid_title_list) > 0:
-            if len(valid_title_list) == 1:
-                # If it's a valid article, pull it from Wikipedia
-                pull_valid_article(valid_title_list[0])
-            else:
-                # Run add_title on each title in valid_titles
-                for valid_title in valid_title_list:
-                    add_title(valid_title, depth + 1)
+    print("Checking new title %s..." % title)
+    # If the title is not in the articles table, check to see if it's a valid title
+    valid_title_list = filter_titles(validated_titles(title))
+    print("Valid titles: %s" % valid_title_list)
+    
+    # Check to see if it's a valid article or redirected
+    if len(valid_title_list) > 0:
+        if len(valid_title_list) == 1:
+            # If it's a valid article, pull it from Wikipedia
+            pull_valid_article(valid_title_list[0])
         else:
-            print("No valid titles found for %s." % title)
-    else:
-        print("Skipping %s since it's too deep." % title)
+            # Run add_title on each title in valid_titles
+            for valid_title in valid_title_list:
+                pull_valid_article(valid_title)
 
 
 ### Create SQLite database and tables, if needed...
@@ -130,6 +119,7 @@ with open('dict_test') as f:
     dict = f.readlines()
 
 # Run through all titles and pull the contents from Wikipedia
+# TODO: Thread this
 wiki = wikipediaapi.Wikipedia('en')
 for raw_title in dict:
     # Remove the newline character from the end of the title
