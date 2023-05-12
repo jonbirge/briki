@@ -2,6 +2,7 @@
 
 import sys
 import re
+import time
 import sqlite3
 import datetime
 import wikipediaapi
@@ -35,6 +36,7 @@ def validated_titles(raw_title):
     # TODO: check for foreign characters or short names
     titles = []
     try:
+        time.sleep(1)
         page = wiki.page(raw_title)
         if page.exists():
             if "Category:All disambiguation pages" in page.categories:
@@ -59,6 +61,7 @@ def pull_valid_article(title):
     if row is None:  # We don't have this one yet.
         print("Pulling %s into to database..." % title)
         try:
+            time.sleep(1)
             page = wiki.page(title)
             contents = clean_summary(page.summary)
 
