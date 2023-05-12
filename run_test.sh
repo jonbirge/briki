@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm -f bliki.db
+rm -f briki.db
 python pull_wiki_entries.py
 

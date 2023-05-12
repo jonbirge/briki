@@ -17,7 +17,8 @@ def clean_summary(text):
 
 def is_good_title(title):
     # Check if the title is a good title
-    return (len(title) > 2 and 
+    return (len(title) > 2 and
+            not "(disambiguation)" in title and
             not title.startswith("Talk:") and
             not title.startswith("Help:"))
 
@@ -40,14 +41,13 @@ def validated_titles(raw_title):
                 print("%s links to %s, a disambiguation page." % (raw_title, page.title))
                 for link in page.links:
                     titles.append(link)
-                titles = filter_titles(titles)
             else:
                 print("%s links to %s." % (raw_title, page.title))
                 titles.append(page.title)
     except Exception as e:
         print("*** Error validating %s: %s" % (raw_title, e))
         titles = []
-    return titles
+    return filter_titles(titles)
 
 def pull_valid_article(title):
     # Add a valid article to the articles table from the Wikipedia API
@@ -64,6 +64,9 @@ def pull_valid_article(title):
 
             # Get the current data and time
             date_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # TODO: Get links to other pages in the see also section, if it exists
+            see_also = ""
 
             # Insert the title, date_update, contents, see_also, and see_from into the articles table
             cursor.execute('''
@@ -98,7 +101,7 @@ def add_title(title):
 ### Create SQLite database and tables, if needed...
 
 # Connect to SQLite database (or create it if it doesn't exist)
-conn = sqlite3.connect('bliki.db')
+conn = sqlite3.connect('briki.db')
 cursor = conn.cursor()
 
 # Check to see if articles table exists and if it doesn't create it...

@@ -5,7 +5,7 @@ import sys
 
 # If a command line argument is provided, use it as the database file name
 # Otherwise, use 'default.db' as the default name
-db_file = sys.argv[1] if len(sys.argv) > 1 else 'bliki.db'
+db_file = sys.argv[1] if len(sys.argv) > 1 else 'briki.db'
 
 # Connect to the SQLite database
 conn = sqlite3.connect(db_file)
