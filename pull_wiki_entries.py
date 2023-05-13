@@ -9,7 +9,7 @@ import wikipediaapi
 
 
 ### Parameters
-# BATCH_SIZE = 128  # number of articles to process at a time (eventually)
+THROTTLE_TIME = 0.5
 
 def clean_summary(text):
     # Use a regular expression to add a space after every period that's
@@ -36,7 +36,7 @@ def validated_titles(raw_title):
     # TODO: check for foreign characters or short names
     titles = []
     try:
-        time.sleep(1)
+        time.sleep(THROTTLE_TIME)
         page = wiki.page(raw_title)
         if page.exists():
             if "Category:All disambiguation pages" in page.categories:
@@ -52,8 +52,6 @@ def validated_titles(raw_title):
     return filter_titles(titles)
 
 def pull_valid_article(title):
-    # Add a valid article to the articles table from the Wikipedia API
-
     # Check to see if the title is already in the articles table
     # TODO: Also check date_update to see if it is out of date
     cursor.execute('SELECT * FROM articles WHERE title=?', (title,))
@@ -61,7 +59,7 @@ def pull_valid_article(title):
     if row is None:  # We don't have this one yet.
         print("Pulling %s into to database..." % title)
         try:
-            time.sleep(1)
+            time.sleep(THROTTLE_TIME)
             page = wiki.page(title)
             contents = clean_summary(page.summary)
 
@@ -128,6 +126,7 @@ cursor.execute('''
 ### Update the database of definitions for dict_test...
 
 # Read each line of dict_test into an array
+# TODO: Allow reading from stdin...
 filename = sys.argv[1]
 with open(filename) as f:
     dict = f.readlines()
