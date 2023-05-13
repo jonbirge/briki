@@ -102,18 +102,13 @@ def add_title(title):
                 pull_valid_article(valid_title)
 
 
-### Command line handling
-                
+# Command line handling          
 if len(sys.argv) < 2:
-    print("Usage: python pull_wiki_entries.py <filename>")
     filename = "dict_test"
 else:
     filename = sys.argv[1]
 
-
-### Create SQLite database and tables, if needed...
-
-# Connect to SQLite database (or create it if it doesn't exist)
+# Connect to SQLite database
 conn = sqlite3.connect('briki.db')
 cursor = conn.cursor()
 
@@ -126,10 +121,7 @@ cursor.execute('''
         contents TEXT,
         see_also TEXT)
 ''')
-               
-
-### Update the database of definitions for dict_test...
-
+  
 # Read each line of dict_test into an array
 with open(filename) as f:
     dict = f.readlines()
