@@ -1,3 +1,4 @@
+Add throughput estimates periodically to the log (for tuning throttle settings)
 Record words that link to articles (via disambiguation or rename)
 Keep separate table of search terms and validated article titles
 Only do validation if search term isn't found in above table
