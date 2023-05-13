@@ -20,8 +20,8 @@ c.execute("SELECT name FROM sqlite_master WHERE type='table';")
 # Get the first table name
 table_name = c.fetchone()[0]
 
-# Get the first 10 rows from the table
-c.execute(f"SELECT * FROM {table_name} LIMIT 10;")
+# Get the last 10 rows from the table
+c.execute(f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 10;")
 
 # Fetch all the rows
 rows = c.fetchall()
