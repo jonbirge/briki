@@ -3,3 +3,6 @@ Keep separate table of search terms and validated article titles
 Only do validation if search term isn't found in above table
 Allow specification of database for testing purposes
 Provide dictionary words via standard input or file
+Integrate GPT-2 with local keyword search to allow natural-language interaction
+Similar to above but with all local man pages on a Unix system
+
