@@ -59,6 +59,7 @@ def pull_valid_article(title):
     if row is None:  # We don't have this one yet.
         print("Pulling %s into to database..." % title)
         try:
+            # grab page from Wikipedia
             time.sleep(THROTTLE_TIME)
             page = wiki.page(title)
             contents = clean_summary(page.summary)
@@ -68,6 +69,8 @@ def pull_valid_article(title):
 
             # TODO: Get links to other pages in the see also section, if it exists
             see_also = ""
+
+            # TODO: Get the original query that led to this page
 
             # Insert the title, date_update, contents, see_also, and see_from into the articles table
             cursor.execute('''
@@ -101,9 +104,11 @@ def add_title(title):
 
 ### Command line handling
                 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print("Usage: python pull_wiki_entries.py <filename>")
-    sys.exit(1)
+    filename = "dict_test"
+else:
+    filename = sys.argv[1]
 
 
 ### Create SQLite database and tables, if needed...
@@ -126,13 +131,10 @@ cursor.execute('''
 ### Update the database of definitions for dict_test...
 
 # Read each line of dict_test into an array
-# TODO: Allow reading from stdin...
-filename = sys.argv[1]
 with open(filename) as f:
     dict = f.readlines()
 
 # Run through all titles and pull the contents from Wikipedia
-# TODO: Parallelize this...
 wiki = wikipediaapi.Wikipedia('en')
 for raw_title in dict:
     # Remove the newline character from the end of the title

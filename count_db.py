@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 
+import sys
 import sqlite3
 
+# get database from command line
+if len(sys.argv) < 2:
+    database = "briki.db"
+else:
+    database = sys.argv[1]
+
 # open briki.db for reading
-conn = sqlite3.connect('briki.db')
+print("Opening %s for reading..." % database)
+conn = sqlite3.connect(database)
 cursor = conn.cursor()
 
 # print the name and the number of rows in each table
