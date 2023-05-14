@@ -12,13 +12,11 @@ import sys
 def remove_extra_spaces(string):
     return re.sub(r'\s+', ' ', string)
 
-# Check if the correct number of arguments have been provided.
+# If no database name is provided, use the default.
 if len(sys.argv) != 2:
-    print('Usage: python script.py <database>')
-    sys.exit(1)
-
-# The first and second command line arguments are the names of the databases.
-db_name = sys.argv[1]
+    db_name = "briki.db"
+else:
+    db_name = sys.argv[1]
 
 # Connect to the first database.
 conn = sqlite3.connect(db_name)
@@ -39,17 +37,17 @@ for line in sys.stdin:
     # Remove leading and trailing whitespace.
     line = line.strip()
 
-    # Query the first database for rows where the 'title' column starts with the line just read.
-    # Use the SQLite LIKE operator for a case-insensitive match.
+    # Query the first database for rows where the 'title' column starts with the
+    # line just read. Use the SQLite LIKE operator for a case-insensitive match.
     cursor.execute(f"SELECT * FROM {table_name} WHERE title LIKE ?;", (line+'%',))
 
     # Fetch all the matching rows.
     rows = cursor.fetchall()
 
     # For each matching row...
-    for row in cursor:
-        title = row[0]
-        contents = remove_extra_spaces(row[1])
+    for row in rows:
+        title = row[1]
+        contents = remove_extra_spaces(row[3])
         print("*%s*: %s" % (title, contents))
         print("")
 
