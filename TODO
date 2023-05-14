@@ -1,3 +1,6 @@
+- Utility to remove plural entries from contents and articles
+- Just have TOC utility generate TOC table
+- Separate utility to generate references_in column of articles table?
 - Function to pull TOC XHTML file for use in EPUB, or gen EPUB directly
 - Generate each article as separate XHTML page?
 - Generate pages with (possibly redundant) articles from the same search term?
