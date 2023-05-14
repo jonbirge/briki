@@ -163,4 +163,4 @@ cython_debug/
 *.out
 *.out.*
 *.db-journal
-dict_left
+

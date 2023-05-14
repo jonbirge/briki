@@ -33,7 +33,6 @@ def filter_titles(titles):
 
 def validated_titles(raw_title):
     # Check raw_title and return a (potentially empty) list of validated titles
-    # TODO: check for foreign characters or short names
     titles = []
     try:
         time.sleep(THROTTLE_TIME)

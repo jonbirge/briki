@@ -1,55 +1,57 @@
 #!/usr/bin/env python
 
+import re
 import sqlite3
 import sys
-import csv
 
-def main():
-    # Check if the correct number of arguments have been provided.
-    if len(sys.argv) != 3:
-        print('Usage: python script.py <database1> <database2>')
-        sys.exit(1)
 
-    # The first and second command line arguments are the names of the databases.
-    db1_name = sys.argv[1]
-    db2_name = sys.argv[2]
+### Create a new database with words related to those provided in the standard input.
 
-    # Connect to the first database.
-    conn1 = sqlite3.connect(db1_name)
-    cursor1 = conn1.cursor()
+# Function that takes a string and returns the string with all repeated white
+# spaces replaces with a single space.
+def remove_extra_spaces(string):
+    return re.sub(r'\s+', ' ', string)
 
-    # Connect to the second database.
-    conn2 = sqlite3.connect(db2_name)
-    cursor2 = conn2.cursor()
+# Check if the correct number of arguments have been provided.
+if len(sys.argv) != 2:
+    print('Usage: python script.py <database>')
+    sys.exit(1)
 
-    # Fetch the name of the first table in the first database.
-    cursor1.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    table_name = cursor1.fetchone()[0]
+# The first and second command line arguments are the names of the databases.
+db_name = sys.argv[1]
 
-    # Read from the standard input, one line at a time.
-    for line in sys.stdin:
-        line = line.strip()
+# Connect to the first database.
+conn = sqlite3.connect(db_name)
+cursor = conn.cursor()
 
-        # Query the first database for rows where the 'title' column starts with the line just read.
-        # Use the SQLite LIKE operator for a case-insensitive match.
-        cursor1.execute(f"SELECT * FROM {table_name} WHERE title LIKE ?;", (line+'%',))
+# Fetch the name of the first table in the first database.
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+table_name = cursor.fetchone()[0]
 
-        # Fetch all the matching rows.
-        rows = cursor1.fetchall()
+# Read from the standard input, one line at a time.
+n = 0
+for line in sys.stdin:
+    # Print a status message to stderr every 100 lines read.
+    n += 1
+    if n % 100 == 0:
+        print("Read %d lines" % n, file=sys.stderr)
 
-        # For each matching row...
-        for row in rows:
-            # Prepare the placeholders for the INSERT statement.
-            placeholders = ', '.join('?' * len(row))
-            # Insert the row into the second database.
-            cursor2.execute(f"INSERT INTO {table_name} VALUES ({placeholders})", row)
+    # Remove leading and trailing whitespace.
+    line = line.strip()
 
-    # Commit the changes to the second database.
-    conn2.commit()
+    # Query the first database for rows where the 'title' column starts with the line just read.
+    # Use the SQLite LIKE operator for a case-insensitive match.
+    cursor.execute(f"SELECT * FROM {table_name} WHERE title LIKE ?;", (line+'%',))
 
-    # Close the connections to both databases.
-    conn1.close()
-    conn2.close()
+    # Fetch all the matching rows.
+    rows = cursor.fetchall()
 
-if __name__ == "__main__":
-    main()
+    # For each matching row...
+    for row in cursor:
+        title = row[0]
+        contents = remove_extra_spaces(row[1])
+        print("*%s*: %s" % (title, contents))
+        print("")
+
+# Close the connections to both databases.
+conn.close()
