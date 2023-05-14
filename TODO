@@ -1,8 +1,10 @@
+- Temporary function to build TOC table from log
+- Make TOC XHTML file for use in EPUB, or gen EPUB directly
+- Generate each article as separate XHTML page?
+- Generate pages with set of articles from the same search term?
 - Add throughput estimates periodically to the log (for tuning throttle settings)
-- Record words that link to articles (via disambiguation or rename), including
-  when entries are already in the database
-- Keep separate table of search terms and validated article titles
-- Only do validation in pull_wiki_entries if search term isn't found in above table
-- Integrate GPT-2 with local keyword search to allow natural-language interaction
-- Similar to above but with all local man pages on a Unix system
+- During pull, generate separate TOC table of search terms and validated article titles
 - Exports should filter out anything with LaTeX content.
+- Only do validation in pull_wiki_entries (on subsequent entries) if search term isn't found in above table
+- Integrate with GPT-2 with local keyword search to allow natural-language interaction
+- Similar to above but with all local man pages on a Unix system
