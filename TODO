@@ -5,3 +5,4 @@
 - Only do validation in pull_wiki_entries if search term isn't found in above table
 - Integrate GPT-2 with local keyword search to allow natural-language interaction
 - Similar to above but with all local man pages on a Unix system
+- Exports should filter out anything with LaTeX content.

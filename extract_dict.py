@@ -48,7 +48,7 @@ for line in sys.stdin:
     for row in rows:
         title = row[1]
         contents = remove_extra_spaces(row[3])
-        print("*%s*: %s" % (title, contents))
+        print("*%s*: %s (From %s)" % (title, contents, line))
         print("")
 
 # Close the connections to both databases.
