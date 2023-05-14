@@ -18,7 +18,7 @@ def begin_html_document():
 <head>
 <meta charset="UTF-8">
 <title>Brikipaedia</title>
-<! <link rel="stylesheet" href="styles.css"> /!>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
