@@ -4,6 +4,7 @@ import re
 import sqlite3
 import sys
 import json
+import ast
 
 
 ### Parameters
@@ -33,55 +34,62 @@ cursor.execute(f'''
         refs TEXT)
 ''')
 
-# Read dict from the standard input, one line at a time.
-# TODO: Eventually this will be a log file.
-n = 0
-for line in sys.stdin:
-    # Print a status message to stderr every 100 lines read.
-    n += 1
-    if n % 100 == 0:
-        print("Read %d lines" % n, file=sys.stderr)
-
+# Read log from the standard input, one line at a time.
+read_next = False
+for log_line in sys.stdin:
     # Remove leading and trailing whitespace.
-    line = line.strip()
+    log_line = log_line.strip()
 
-    # Query the first database for rows where the 'title' column starts with the
-    # line just read. Use the SQLite LIKE operator for a case-insensitive match.
-    # TODO: Take this list of titles (or title) from the log file.
-    cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title LIKE ?;", (line+'%',))
-
-    # Create a list of all the validated titles from the rows returned.
-    titles = [row[1] for row in cursor.fetchall()]
-    
-    # Print "line: titles" to stderr.
-    print("%s: %s" % (line, titles), file=sys.stderr) 
-
-    # Add a row to the "toc" table with the line just read as the "term" column.
-    # The "references" column should be a JSON-encoded list of the titles found.
-    cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);",
-                     (line, json.dumps(titles)))
-    
-    # Now, go through each title in titles and find the corresponding row in the "articles" table.
-    # Add the title to the "references" column of that row.
-    for title in titles:
-        cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title = ?;", (title,))
-        row = cursor.fetchone()
-        if row is None:
-            print("Error: Could not find row for title '%s'" % title, file=sys.stderr)
+    # Check to see if line is of the form "X links to Y, a disambiguation page."
+    if not read_next:
+        match = re.match(r'^(.+) links to (.*)\.$', log_line)
+        if match:
+            term = match.group(1)
+            something = match.group(2)
+            print(f"{term} links to {something}, will get next line...")
+            read_next = True
+        titles = []
+    else:
+        read_next = False
+        # Check to see if line is of form "Valid Titles: X"
+        match = re.match(r'^Valid titles: (.*)$', log_line)
+        if match and term != "":
+            titles_str = match.group(1)
+            titles = ast.literal_eval(titles_str)
+            print(f"{term} points to {titles}.")
         else:
-            # Check to see if row[4] is None. If it is, set refs_in to an empty list.
-            if row[4] is "":
-                refs_in = []
+            titles = []
+            term = ""
+
+    # Add reference(s) to database...
+    if len(titles) > 0:
+        # Add a row to the "toc" table with the line just read as the "term" column.
+        # The "references" column should be a JSON-encoded list of the titles found.
+        print(f"Adding {term} row to toc table...")
+        cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);",
+                        (term, json.dumps(titles)))
+        
+        # Now, go through each title in titles and find the corresponding row in the "articles" table.
+        # Add the title to the "references" column of that row.
+        for title in titles:
+            cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title = ?;", (title,))
+            row = cursor.fetchone()
+            if row is None:
+                print("Error: Could not find row for title '%s'" % title)
             else:
-                # Decode the JSON-encoded list of references.
-                refs_in = json.loads(row[4])
-            # Add the line just read to the list of references.
-            refs_in.append(line)
-            # Remove duplicates from the list of references.
-            refs_in = list(set(refs_in))
-            # Update the row with the new list of references.
-            cursor.execute(f"UPDATE {ARTICLE_TABLE} SET see_also = ? WHERE title = ?",
-                           (json.dumps(refs_in), title))
+                # Check to see if row[4] is None. If it is, set refs_in to an empty list.
+                if row[4] == "":
+                    refs_in = []
+                else:
+                    # Decode the JSON-encoded list of references.
+                    refs_in = json.loads(row[4])
+                # Add the line just read to the list of references.
+                refs_in.append(term)
+                # Remove duplicates from the list of references.
+                refs_in = list(set(refs_in))
+                # Update the row with the new list of references.
+                cursor.execute(f"UPDATE {ARTICLE_TABLE} SET see_also = ? WHERE title = ?",
+                            (json.dumps(refs_in), title))
 
 # Close the connections to both databases.
 conn.close()
