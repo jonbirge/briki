@@ -165,4 +165,5 @@ cython_debug/
 *.db-journal
 *.html
 *.xhtml
+html/
 

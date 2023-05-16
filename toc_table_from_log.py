@@ -26,7 +26,7 @@ else:
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
-# Create the "toc" table, if it doesn't exist, with rows called "id", "title", "refs".
+# Create the "contents" table, if it doesn't exist, with rows called "id", "title", "refs".
 cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS {TOC_TABLE}(
         id INTEGER PRIMARY KEY,

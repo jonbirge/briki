@@ -1,4 +1,3 @@
-- Utility to remove plural entries from contents and articles?
 - Separate utility to generate references_in column of articles table?
 - Function to pull TOC XHTML file for use in EPUB, or gen EPUB directly
 - Generate each article as separate XHTML page?
@@ -7,6 +6,10 @@
 - During pull, generate separate TOC table of search terms and validated article titles
 - Wiki pulls should log everything to a time-stamped logfile by default
 - Exports should filter out anything with LaTeX content
-- Only do validation in pull_wiki_entries (on subsequent entries) if search term isn't found in above table
+- Only do validation in pull_wiki_entries if search term isn't found in TOC table
+- TOC table should use table IDs, not titles. Must also change toc_table_from_log.py
 - Integrate with GPT-2 with local keyword search to allow natural-language interaction
 - Similar to above but with all local man pages on a Unix system
+- Centralized library with constants and common utility functions
+    - XHTML utilities
+    - Database tables and schema
