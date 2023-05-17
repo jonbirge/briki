@@ -12,18 +12,17 @@ db_file = sys.argv[1] if len(sys.argv) > 1 else 'briki.db'
 conn = sqlite3.connect(db_file)
 
 # Create a cursor object
-c = conn.cursor()
+cursor = conn.cursor()
 
-# Get the first 10 rows from the table
-c.execute(f"SELECT * FROM articles LIMIT 10;")
+# Execute the query that retrieves all table names
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 
-# Fetch all the rows
-rows = c.fetchall()
-
-# Print the rows
-for row in rows:
-    print(row)
-    print("---")
+# Fetch all results of the query
+tables = cursor.fetchall()
 
 # Close the connection
 conn.close()
+
+# Extract table names and print them
+for table in tables:
+    print(table[0])

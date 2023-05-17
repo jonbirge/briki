@@ -112,6 +112,7 @@ conn = sqlite3.connect('briki.db')
 cursor = conn.cursor()
 
 # Check to see if articles table exists and if it doesn't create it...
+# TODO: Rename see_also to refs_in
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS articles(
         id INTEGER PRIMARY KEY,
