@@ -1,10 +1,10 @@
+- Get HTML version of summary during crawl
 - Separate utility to generate references_in column of articles table?
 - Add throughput estimates periodically to the log (for tuning throttle settings)
-- During pull, generate separate TOC table of search terms and validated article titles
-- Function to crawl Wikipedia and update outdated articles in db
+- During pull, generate TOC table of validated article titles
+- Function to re-crawl Wikipedia and update outdated articles in db
 - Wiki pulls should log everything to a time-stamped logfile by default
-- Exports should filter out anything with LaTeX content
-- Only do validation in pull_wiki_entries if search term isn't found in TOC table
+- Crawl should filter out anything with LaTeX content
 - TOC table should use table IDs, not titles. Must also change toc_table_from_log.py
 - Integrate with GPT-2 with local keyword search to allow natural-language interaction
 - Similar to above but with all local man pages on a Unix system

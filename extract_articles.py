@@ -17,15 +17,16 @@ TABLE_NAME = 'articles'
 def path_prefix(id):
     number_str = str(id)
     first_digit = number_str[0]
-    return f"./html/{first_digit}/"
+    return f"{first_digit}/"
 
-def begin_html_document():
-     return '''
+def begin_html_document(title):
+     return f'''
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Brikipaedia</title>
+<title>{title}</title>
+<link rel="stylesheet" href="../../../styles.css">
 <link rel="stylesheet" href="../styles.css">
 </head>
 
@@ -42,6 +43,12 @@ def add_article(title, content):
 </article>
     '''
     return str
+
+def add_index_entry(title, id):
+    return add_content_paragraphs([add_link(title, id)])
+
+def add_link(title, id):
+    return f'<a href="{path_prefix(id)}{id}.html">{title}</a>'
 
 def add_content_paragraphs(paragraphs):
     str = ""
@@ -83,6 +90,12 @@ cursor = conn.cursor()
 # Read every row from the "articles" table.
 cursor.execute(f"SELECT * FROM {TABLE_NAME};")
 
+# Open index.html file for writing.
+# TODO: Sort the index entries. Perhaps best done in SQL.
+index_file = open_file_with_dir_creation("html/articles/index.html")
+index_file.write(begin_html_document("Index of articles"))
+index_file.write("<h1>Index of articles</h1>\n")
+
 # Read from the standard input, one line at a time.
 n = 0
 row = cursor.fetchone()
@@ -91,26 +104,29 @@ while row is not None:
     if n % 1000 == 0:
         print("Generated %d entries" % n, file=sys.stderr)
     
-    # Process the row
+    # Process the row and update index.
     id = row[0]
     title = row[1]
-    summary = remove_extra_spaces(row[3])
-    file_path = f"{path_prefix(id)}{id}.html"
+    index_file.write(add_index_entry(title, id))
 
     # Open file for writing.
+    file_path = f"html/articles/{path_prefix(id)}{id}.html"
     file = open_file_with_dir_creation(file_path)
 
     # Generate page
-    html_str = begin_html_document()
+    summary = remove_extra_spaces(row[3])
+    html_str = begin_html_document(title)
     html_str += add_article(title, [summary])
     html_str += end_html_document()
-
-    # Write to file.
     file.write(html_str)
     file.close()
 
     # Fetch the next row
     row = cursor.fetchone()
     
+# Close the index file.
+index_file.write(end_html_document())
+index_file.close()
+
 # Close the connections to both databases.
 conn.close()
