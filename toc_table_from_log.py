@@ -75,8 +75,12 @@ for log_line in sys.stdin:
         refs = []
         for title in titles:
             cursor.execute(f"SELECT id FROM {ARTICLES_TABLE} WHERE title = ?;", (title,))
-            id = cursor.fetchone()[0]
-            refs.append(id)
+            try:
+                id = cursor.fetchone()[0]
+                refs.append(id)
+            except:
+                print(f"ERROR: {title} not found in {ARTICLES_TABLE}!")
+
         
         refs_json = json.dumps(refs)
         print(f"Found refs: {refs_json}")
