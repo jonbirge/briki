@@ -19,7 +19,7 @@ TOC_TABLE = 'contents'
 def path_prefix(id):
     number_str = str(id)
     first_digit = number_str[0]
-    return f"./html/{first_digit}/"
+    return f"./{first_digit}/"
 
 def begin_html_document():
      return '''

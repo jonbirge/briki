@@ -8,7 +8,7 @@ import ast
 
 
 ### Parameters
-ARTICLE_TABLE = 'articles'
+ARTICLES_TABLE = 'articles'
 TOC_TABLE = 'contents'
 
 ### Functions
@@ -26,6 +26,9 @@ else:
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
+# Drop the "contents" table, if it exists.
+# ...
+
 # Create the "contents" table, if it doesn't exist, with rows called "id", "title", "refs".
 cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS {TOC_TABLE}(
@@ -39,7 +42,7 @@ read_next = False
 n = 0
 for log_line in sys.stdin:
     n += 1
-    if n % 1000 == 0:
+    if n % 100 == 0:
         print(f"Read {n} lines...", file=sys.stderr)
 
     # Remove leading and trailing whitespace.
@@ -69,10 +72,17 @@ for log_line in sys.stdin:
     # Add reference(s) to database...
     if len(titles) > 0:
         print(f"Adding {term} row to toc table...")
-        titles_json = json.dumps(titles)
-        cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);",
-                        (term, titles_json))
+        refs = []
+        for title in titles:
+            cursor.execute(f"SELECT id FROM {ARTICLES_TABLE} WHERE title = ?;", (title,))
+            id = cursor.fetchone()[0]
+            refs.append(id)
         
+        refs_json = json.dumps(refs)
+        print(f"Found refs: {refs_json}")
+        cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);",
+                        (term, refs_json))
+
         # Now, go through each title in titles and find the corresponding row in the "articles" table.
         # Add the title to the "references" column of that row.
         # for title in titles:
