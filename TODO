@@ -1,9 +1,7 @@
 - Separate utility to generate references_in column of articles table?
-- Function to pull TOC XHTML file for use in EPUB, or gen EPUB directly
-- Generate each article as separate XHTML page?
-- Generate pages with (possibly redundant) articles from the same search term?
 - Add throughput estimates periodically to the log (for tuning throttle settings)
 - During pull, generate separate TOC table of search terms and validated article titles
+- Function to crawl Wikipedia and update outdated articles in db
 - Wiki pulls should log everything to a time-stamped logfile by default
 - Exports should filter out anything with LaTeX content
 - Only do validation in pull_wiki_entries if search term isn't found in TOC table
