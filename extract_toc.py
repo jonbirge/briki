@@ -34,20 +34,31 @@ def begin_html_document():
     <h1>Brikipaedia Index</h1>
     '''
 
+# <div class="entry">
+# <div class="word">Word 1</div>
+# <div class="links">
+#     <a href="#">Related Article 1</a>
+#     <span class="dot">&#8226;</span>
+#     <a href="#">Related Article 2</a>
+#     <span class="dot">&#8226;</span>
+#     <a href="#">Related Article 3</a>
+# </div>
+# </div>
 # Add index entry for all articles in article_list.
 # Each article is a tuple of (title, id).
 def add_index_entry(title, article_list):
     str = f'''
-<index>
-<p>
-<b>{title}</b>: 
+<div class="entry">
+<div class="word">{title}</div>
+<div class="links">
     '''
     for article in article_list:
-        str += f'{add_link(article)} | '
-    str = str[:-3]
+        str += add_link(article)
+        if article != article_list[-1]:
+            str += '<span class="dot">&#8226;</span>'
     str += '''
-</p>
-</index>
+</div>
+</div>
     '''
     return str
 
@@ -59,7 +70,7 @@ def add_link(article_tuple):
 def end_html_document():
     return '''
 <footer>
-<p>© 2023 Jonathan Birge. All rights reserved.</p>
+<p>©2023 Briki. All rights reserved.</p>
 </footer>
 </body>
 </html>

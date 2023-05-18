@@ -26,7 +26,7 @@ def begin_html_document():
 <head>
 <meta charset="UTF-8">
 <title>Brikipaedia</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body>
@@ -52,7 +52,7 @@ def add_content_paragraphs(paragraphs):
 def end_html_document():
     return '''
 <footer>
-<p>© 2023 Jonathan Birge. All rights reserved.</p>
+<p>©2023 Briki. All rights reserved.</p>
 </footer>
 </body>
 </html>
