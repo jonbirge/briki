@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# 2023-05-16 14:18:05
 
 import re
 import sqlite3
