@@ -27,11 +27,11 @@ conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
 # Drop the "contents" table, if it exists.
-# ...
+cursor.execute(f"DROP TABLE IF EXISTS {TOC_TABLE};")
 
-# Create the "contents" table, if it doesn't exist, with rows called "id", "title", "refs".
+# Create the "contents" table with rows called "id", "title", "refs".
 cursor.execute(f'''
-    CREATE TABLE IF NOT EXISTS {TOC_TABLE}(
+    CREATE TABLE {TOC_TABLE}(
         id INTEGER PRIMARY KEY,
         term TEXT NOT NULL,
         refs TEXT NOT NULL)
@@ -80,33 +80,10 @@ for log_line in sys.stdin:
         
         refs_json = json.dumps(refs)
         print(f"Found refs: {refs_json}")
-        cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);",
-                        (term, refs_json))
+        cursor.execute(f"INSERT INTO {TOC_TABLE} (term, refs) VALUES (?, ?);", (term, refs_json))
 
-        # Now, go through each title in titles and find the corresponding row in the "articles" table.
-        # Add the title to the "references" column of that row.
-        # for title in titles:
-        #     cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title = ?;", (title,))
-        #     row = cursor.fetchone()
-        #     if row is None:
-        #         print("Error: Could not find row for title '%s'" % title)
-        #     else:
-        #         # Check to see if row[4] is None. If it is, set refs_in to an empty list.
-        #         if row[4] == "":
-        #             refs_in = []
-        #         else:
-        #             # Decode the JSON-encoded list of references.
-        #             refs_in = json.loads(row[4])
-        #         # Add the line just read to the list of references.
-        #         refs_in.append(term)
-        #         # Remove duplicates from the list of references.
-        #         refs_in = list(set(refs_in))
-        #         # Update the row with the new list of references.
-        #         cursor.execute(f"UPDATE {ARTICLE_TABLE} SET see_also = ? WHERE title = ?",
-        #                     (json.dumps(refs_in), title))
-
-# Commit the changes to the database.
-conn.commit()
+        # Commit the changes to the database.
+        conn.commit()
 
 # Close the connections to both databases.
 conn.close()
