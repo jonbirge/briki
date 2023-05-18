@@ -58,8 +58,6 @@ def end_html_document():
 </html>
     '''
 
-# Function that takes a string and returns the string with all repeated white
-# spaces replaced with a single space.
 def remove_extra_spaces(string):
     return re.sub(r'\s+', ' ', string)
 

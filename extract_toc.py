@@ -30,7 +30,6 @@ def begin_html_document():
 <title>Brikipaedia Index</title>
 <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <h1>Brikipaedia Index</h1>
     '''
@@ -40,11 +39,14 @@ def begin_html_document():
 def add_index_entry(title, article_list):
     str = f'''
 <index>
-{title}: 
+<p>
+<b>{title}</b>: 
     '''
     for article in article_list:
-        str += f'{add_link(article)} '
+        str += f'{add_link(article)} | '
+    str = str[:-3]
     str += '''
+</p>
 </index>
     '''
     return str
@@ -87,7 +89,7 @@ cursor = conn.cursor()
 
 # Read every row from the "contents" table.
 # Each row is a tuple of (word, refs).
-# Refs is a list of titles in JSON format.
+# Refs is a list of article IDs in JSON format.
 cursor.execute(f"SELECT * FROM {TOC_TABLE};")
 toc_list = cursor.fetchall()
 
@@ -98,21 +100,21 @@ file.write(html_str)
 
 # loop through all entries in the TOC.
 n = 0
-for word in toc_list:
+for row in toc_list:
     n += 1
-    if n % 100 == 0:
+    if n % 1000 == 0:
         print("Generated %d entries" % n, file=sys.stderr)
     
     # Get the word and extract the JSON-encoded list of refs.
-    title = word[1]
-    refs = json.loads(word[2])
+    title = row[1]
+    ref_ids = json.loads(row[2])
 
-    # For each ref, get the ID from the "articles" table.
+    # Get the titles of all articles in the list of refs.
     articles = []
-    for ref in refs:
-        cursor.execute(f"SELECT id FROM {ARTICLES_TABLE} WHERE title = ?;", (ref,))
-        id = cursor.fetchone()[0]
-        articles.append((ref, id))
+    for id in ref_ids:
+        cursor.execute(f"SELECT title FROM {ARTICLES_TABLE} WHERE id = {id};")
+        article_title = cursor.fetchone()[0]
+        articles.append((article_title, id))
     
     # Write the index entry to the file.
     file.write(add_index_entry(title, articles))
