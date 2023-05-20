@@ -5,7 +5,7 @@
 - Function to re-crawl Wikipedia and update outdated articles in db
 - Wiki pulls should log everything to a time-stamped logfile by default
 - Crawl should filter out anything with LaTeX content
-- TOC table should use table IDs, not titles. Must also change toc_table_from_log.py
+- clean_db.py should be incorporated into crawl
 - Integrate with GPT-2 with local keyword search to allow natural-language interaction
 - Similar to above but with all local man pages on a Unix system
 - Centralized library with constants and common utility functions

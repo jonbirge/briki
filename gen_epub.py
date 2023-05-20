@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from ebooklib import epub
 import os
 
@@ -14,15 +16,15 @@ book.set_language('en')
 html_dir = "./html"
 
 # Recurse through html_dir and add each HTML file to the book
-n = 0
-for root, dirs, files in os.walk(html_dir):
+n = 0  # Counter for number of files processed
+for (root, dirs, files) in os.walk(html_dir):
     for filename in files:
         if filename.endswith('.html'):
             n += 1
             if n % 1000 == 0:
                 print(f'Processing file {n}: {file_path}...')
             file_path = os.path.join(root, filename)
-            local_file_path = file_path.replace(html_dir, '')
+            local_file_path = file_path.replace(html_dir+"/", '')
             chapter = epub.EpubHtml(title=filename, file_name=local_file_path, lang='en')
             chapter.content = open(file_path, 'r', encoding='utf-8').read()
             book.add_item(chapter)
