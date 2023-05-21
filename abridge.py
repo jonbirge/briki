@@ -25,6 +25,7 @@ def process_toc_row(toc_row):
 
     # Get the titles of all articles in the list of refs.
     keep_ids = []
+    n_keep = 0
     for ref_id in ref_ids:
         cursor_orig.execute(f"SELECT title FROM {ARTICLES_TABLE} WHERE id = {ref_id};")
         article_title = cursor_orig.fetchone()[0]
@@ -35,7 +36,7 @@ def process_toc_row(toc_row):
             # Copy the article to the new database if it doesn't already exist.
             cursor_new.execute(f"SELECT * FROM {ARTICLES_TABLE} WHERE id = {ref_id};")
             if cursor_new.fetchone() is None:
-                # n_kept += 1
+                n_keep += 1
                 cursor_orig.execute(f"SELECT * FROM {ARTICLES_TABLE} WHERE id = {ref_id};")
                 art = cursor_orig.fetchone()
                 cursor_new.execute(f"INSERT INTO {ARTICLES_TABLE} (id, title, date_update, contents, see_also) \
@@ -48,6 +49,9 @@ def process_toc_row(toc_row):
     
     # Commit changes to the new database.
     conn_new.commit()
+
+    # Return the number of articles kept.
+    return n_keep
     
 
 ### Main
@@ -84,15 +88,15 @@ toc_list = cursor_orig.fetchall()
 
 # Loop through all entries in the original TOC.
 n = 0
-# n_kept = 0
+n_kept = 0
 for toc_row in toc_list:
     n += 1
     if n % 250 == 0:
         print("Processed %d toc entries" % n, file=sys.stderr)
-    process_toc_row(toc_row)
+    n_kept += process_toc_row(toc_row)
 
 # Print the number of articles kept.
-# print("Kept %d articles" % n_kept, file=sys.stderr)
+print("Kept %d articles" % n_kept, file=sys.stderr)
 
 # Close the databases.
 conn_orig.close()
