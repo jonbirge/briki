@@ -15,7 +15,6 @@ TOC_TABLE = "contents"
 
 ### Functions
 
-
 # Function to generate file system prefix from an integer ID.
 def path_prefix(id):
     number_str = str(id)
@@ -258,7 +257,7 @@ file.write(html_str)
 file.close()
 
 # Copy stylesheet to html directory.
-os.system("cp styles.css html/styles.css")
+os.system("cp html_styles.css html/styles.css")
 
 # Close the connection to database.
 conn.close()
