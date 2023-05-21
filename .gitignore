@@ -167,4 +167,5 @@ cython_debug/
 *.xhtml
 *.epub
 html/
+.vscode/
 

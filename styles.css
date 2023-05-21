@@ -1,7 +1,6 @@
 /* Reset some default styles */
 body, h1, p, ul {
-  margin: 0;
-  padding: 0;
+  padding: 6pt;
 }
 
 /* Set overall font and background styles */
@@ -9,6 +8,10 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f2f2f2;
   color: #333;
+}
+
+contents {
+  text-align: center;
 }
 
 /* Add some spacing and border styles for articles */
@@ -28,16 +31,16 @@ article h1 {
   margin-bottom: 10px;
 }
 
-/* Style the content paragraphs */
-article p {
-  margin-bottom: 10px;
+/* Style for <div class="links"> */
+.links {
+  margin-left: 0px;
+  margin-bottom: 0px;
+  padding-left: 10px;
 }
 
-/* Add some spacing for lists */
-article ul,
-article ol {
-  margin-bottom: 10px;
-  margin-left: 20px;
+/* Style the content paragraphs */
+article p {
+  margin-bottom: 0px;
 }
 
 /* Style the footer */
@@ -51,8 +54,8 @@ footer {
 
 /* Style links */
 a {
-  color: #0066cc;
-  text-decoration: none;
+  color: hsl(210, 95%, 16%);
+  text-decoration: underline;
 }
 
 a:hover {

@@ -1,13 +1,19 @@
-- Get HTML version of summary during crawl
-- Separate utility to generate references_in column of articles table?
-- Add throughput estimates periodically to the log (for tuning throttle settings)
-- During pull, generate TOC table of validated article titles
+- Get both HTML and text version of summary during crawl
+- During pull, generate TOC table of article titles
 - Function to re-crawl Wikipedia and update outdated articles in db
-- Wiki pulls should log everything to a time-stamped logfile by default
-- Crawl should filter out anything with LaTeX content
+    - Allow for a "force" option to re-crawl all articles
+    - Allow for definition of a "stale" period
+- Wiki pulls should log every action to a time-stamped logfile by default
 - clean_db.py should be incorporated into crawl
-- Integrate with GPT-2 with local keyword search to allow natural-language interaction
-- Similar to above but with all local man pages on a Unix system
 - Centralized library with constants and common utility functions
     - XHTML utilities
     - Database tables and schema
+
+- Alternate web interface
+    - Use Flask backend to serve all related articles
+    - Use "See Also" to load related articles
+    - Allow for setting depth of related articles
+
+- Alternate NLP interface
+    - Integrate with GPT-2 with local keyword search to allow natural-language interaction
+    - Similar to above but with all local man pages on a Unix system
