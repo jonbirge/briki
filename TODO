@@ -1,5 +1,7 @@
+- Start with top 10,000 (Level 4) articles (and their references?)
 - Get both HTML and text version of summary during crawl
-- During pull, generate TOC table of article titles
+- Extract reference graph from text and/or "See Also" links
+- Determine word list by entries with a lot of in-links
 - Function to re-crawl Wikipedia and update outdated articles in db
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
@@ -8,12 +10,13 @@
 - Centralized library with constants and common utility functions
     - XHTML utilities
     - Database tables and schema
+- During pull, generate TOC table of article titles?
 
-- Alternate web interface
+- Web interface
     - Use Flask backend to serve all related articles
     - Use "See Also" to load related articles
     - Allow for setting depth of related articles
 
-- Alternate NLP interface
+- LLM interface
     - Integrate with GPT-2 with local keyword search to allow natural-language interaction
     - Similar to above but with all local man pages on a Unix system

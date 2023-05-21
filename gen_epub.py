@@ -150,8 +150,8 @@ book.toc.append(epub.Link("title_page.xhtml", "Title Page", "title_page"))
 cursor.execute(f"SELECT * FROM {ARTICLE_TABLE};")
 
 # Open index.html file for writing.
-# TODO: Sort the index entries. Perhaps best done in SQL.
-index_page = epub.EpubHtml(title="Index", file_name="index.xhtml")
+# TODO: Sort the index entries. Perhaps best done in SQL ahead of time...
+index_page = epub.EpubHtml(title="Article Index", file_name="index.xhtml")
 index_xhtml = begin_html_document("Index of articles")
 index_xhtml += "<h1>Index of articles</h1>"
 
@@ -161,7 +161,7 @@ row = cursor.fetchone()
 while row is not None:
     n += 1
     if n % 1000 == 0:
-        print("Generated %d entries" % n, file=sys.stderr)
+        print("Generated %d articles" % n, file=sys.stderr)
 
     # Process the row and update index.
     id = row[0]
@@ -177,6 +177,7 @@ while row is not None:
     article_page.content = html_str
     book.add_item(article_page)
     book.spine.append(article_page)
+    book.toc.append(epub.Link(f"article_{id}.xhtml", title, f"article_{id}"))
 
     # Fetch the next row
     row = cursor.fetchone()
@@ -191,7 +192,8 @@ book.toc.append(epub.Link("index.xhtml", "Index", "index"))
 
 ### Finish book
 
-print("Writing epub file...", file=sys.stderr)
+print("Generating epub navigation...", file=sys.stderr)
 book.add_item(epub.EpubNcx())
 book.add_item(epub.EpubNav())
+print("Writing epub file...", file=sys.stderr)
 epub.write_epub("brikipaedia.epub", book)
