@@ -12,7 +12,7 @@ from datetime import datetime
 ### Parameters
 ARTICLE_TABLE = "articles"
 TOC_TABLE = "contents"
-
+DB_FILE = "briki.db"
 
 
 ### Functions
@@ -105,7 +105,7 @@ def open_file_with_dir_creation(file_path):
 
 # If no database name is provided, use the default.
 if len(sys.argv) != 2:
-    db_name = "briki_abridged.db"
+    db_name = DB_FILE
 else:
     db_name = sys.argv[1]
 
