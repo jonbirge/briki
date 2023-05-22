@@ -1,21 +1,18 @@
-- Make requirements.txt file
-- Get both HTML and text version of summary during crawl?
+- Respect line feeds.
 - Extract reference graph from text and/or "See Also" links
-- Determine word list by entries with a lot of in-links
 - Function to re-crawl Wikipedia and update outdated articles in db
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
-- Wiki pulls should log every action to a time-stamped logfile by default
 - clean_db.py should be incorporated into crawl
-- Centralized library with constants and common utility functions
-    - XHTML utilities
-    - Database tables and schema
-- During pull, generate TOC table of article titles?
+- Try going for all 50,000 Level 5 articles
 
 - Web interface
     - Use Flask backend to serve all related articles
     - Use "See Also" to load related articles
     - Allow for setting depth of related articles
+    - Allowing sharing to e-mail, OneNote, PDF or EPUB, including send to Kindle
+    - Primr.io: Get smart quick, anywhere
+    - Mobile version with embedded database?
 
 - LLM interface
     - Integrate with GPT-2 with local keyword search to allow natural-language interaction
