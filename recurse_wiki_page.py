@@ -9,10 +9,20 @@ import wikipediaapi
 
 
 ### Parameters
-DEFAULT_DB = "briki_test.db"
-#DEFAULT_PAGE = "Swarthmore_College"
-DEFAULT_PAGE = "Wikipedia:Vital articles/Level/5"
+DEFAULT_PAGES = ["Wikipedia:Vital articles/Level/4/People",
+                "Wikipedia:Vital articles/Level/4/History",
+                "Wikipedia:Vital articles/Level/4/Geography",
+                "Wikipedia:Vital articles/Level/4/Arts",
+                "Wikipedia:Vital articles/Level/4/Philosophy and religion",
+                "Wikipedia:Vital articles/Level/4/Everyday life",
+                "Wikipedia:Vital articles/Level/4/Society and social sciences",
+                "Wikipedia:Vital articles/Level/4/Biological and health sciences",
+                "Wikipedia:Vital articles/Level/4/Physical sciences",
+                "Wikipedia:Vital articles/Level/4/Technology",
+                "Wikipedia:Vital articles/Level/4/Mathematics"]
+DEFAULT_DEPTH = 1
 THROTTLE_TIME = 0.5
+FILENAME = "wiki_titles"
 
 
 ### Functions
@@ -46,7 +56,7 @@ def is_good_final_title(title):
             not title.startswith("Wikipedia:"))
 
 def filter_links(links):
-    # Filter out link titles that are not good to follow
+    # Filter out titles that are not good links to follow
     links_filtered = []
     for link in links:
         if is_good_link(link):
@@ -54,7 +64,7 @@ def filter_links(links):
     return links_filtered
 
 def filter_titles(titles):
-    # Filter out titles that are not good titles
+    # Filter out titles that are not good articles to keep
     titles_filtered = []
     for title in titles:
         if is_good_final_title(title):
@@ -88,22 +98,31 @@ def recurse_page(page, max_depth, depth=0):
             time.sleep(THROTTLE_TIME)
             linked_page = wiki.page(linked_title)
             linked_titles.extend(recurse_page(linked_page, max_depth, depth))
-    return linked_titles
+    return filter_titles(linked_titles)
     
 
 ### Main
 
+# Open output file
+output_file = open(FILENAME, 'w')
+
 # Command line handling          
 if len(sys.argv) < 2:
-    start_article = DEFAULT_PAGE
+    start_article = DEFAULT_PAGES
 else:
     filename = sys.argv[1]
 
-# Get all links from the main article
+# Get all links from the priority categories
 wiki = wikipediaapi.Wikipedia('en')
-start_article = wiki.page(DEFAULT_PAGE)
-main_article_titles = recurse_page(start_article, 2)
+main_article_titles = []
+for start_article in DEFAULT_PAGES:
+    time.sleep(THROTTLE_TIME)
+    start_article = wiki.page(start_article)
+    main_article_titles.extend(recurse_page(start_article, DEFAULT_DEPTH))
 
 # Write all linked article titles to stdout
 for title in main_article_titles:
-    print(title)
+    print(title, file=output_file)
+
+# Close output file
+output_file.close()
