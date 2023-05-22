@@ -11,7 +11,6 @@ from datetime import datetime
 
 ### Parameters
 ARTICLE_TABLE = "articles"
-TOC_TABLE = "contents"
 DB_FILE = "briki.db"
 
 

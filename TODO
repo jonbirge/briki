@@ -1,5 +1,5 @@
-- Start with top 10,000 (Level 4) articles (and their references?)
-- Get both HTML and text version of summary during crawl
+- Make requirements.txt file
+- Get both HTML and text version of summary during crawl?
 - Extract reference graph from text and/or "See Also" links
 - Determine word list by entries with a lot of in-links
 - Function to re-crawl Wikipedia and update outdated articles in db
