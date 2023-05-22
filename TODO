@@ -1,5 +1,3 @@
-- Respect line feeds.
-- Extract reference graph from "See Also" links, and maybe textual links
 - Function to re-crawl Wikipedia and update outdated articles in db
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
