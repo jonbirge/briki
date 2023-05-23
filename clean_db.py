@@ -23,8 +23,6 @@ def clean_contents(contents):
     contents = re.sub("\n+", "\n", contents)
     # Remove leading and trailing spaces
     contents = contents.strip()
-    # Remove leading and trailing newlines
-    contents = contents.strip("\n")
     # Remove extra spaces before and after punctuation
     contents = re.sub(" +([.,;:?!])", r"\1", contents)
     contents = re.sub("([.,;:?!]) +", r"\1", contents)

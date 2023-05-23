@@ -1,10 +1,10 @@
 - Respect line feeds.
-- Extract reference graph from text and/or "See Also" links
+- Extract reference graph from "See Also" links, and maybe textual links
 - Function to re-crawl Wikipedia and update outdated articles in db
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
-- clean_db.py should be incorporated into crawl
-- Try going for all 50,000 Level 5 articles
+- clean_db.py should be incorporated into pulls
+- Try going for all 50,000 Level 5 articles?
 
 - Web interface
     - Use Flask backend to serve all related articles

@@ -16,12 +16,6 @@ DB_FILE = "briki.db"
 
 ### Functions
 
-# Function to generate file system prefix from an integer ID.
-def path_prefix(id):
-    number_str = str(id)
-    first_digit = number_str[0]
-    return f"{first_digit}/"
-
 def begin_html_document(title):
     return f"""
 <!DOCTYPE html>
@@ -44,16 +38,8 @@ def add_article(title, content):
     """
     return str
 
-def add_article_tuple_link(article_tuple):
-    id = article_tuple[1]
-    title = article_tuple[0]
-    return f'<a href="../../articles/{path_prefix(id)}{id}.html">{title}</a>'
-
 def add_article_link(title, id):
-    return f'<p><a href="{path_prefix(id)}{id}.html">{title}</a></p>'
-
-def add_link(title, link):
-    return f'<p><a href="{link}">{title}</a></p>'
+    return f'<p><a href="article_{id}.html">{title}</a></p>'
 
 def add_content_paragraphs(paragraphs):
     str = ""
@@ -73,31 +59,13 @@ def end_html_document():
 </html>
     """
 
-# Each article is a tuple of (title, id).
-def add_index_entry(title, article_list):
-    str = f"""
-<article>
-<h1>{title}</h1>
-<div class="links">
-    """
-    for article in article_list:
-        str += add_article_tuple_link(article)
-        if article != article_list[-1]:
-            str += '<span class="dot"> &#8226; </span>'
-    str += """
-</div>
-</article>
-    """
-    return str
-
+# Remove extra white space in string.
 def remove_extra_spaces(string):
     return re.sub(r"\s+", " ", string)
 
-def open_file_with_dir_creation(file_path):
-    directory = os.path.dirname(file_path)
-    os.makedirs(directory, exist_ok=True)
-    file = open(file_path, "w")
-    return file
+# Take a string with newline characters and return a list of paragraphs.
+def split_into_paragraphs(string):
+    return string.split("\n")
 
 
 ### Open database
@@ -124,18 +92,19 @@ book.add_author("A cast of thousands")
 
 book.spine = ["nav"]
 
-css_name = "epub_styles.css"
-css_file = open(css_name)
-css_style = css_file.read()
-css_file.close()
+# css_name = "epub_styles.css"
+# css_file = open(css_name)
+# css_style = css_file.read()
+# css_file.close()
 
 db_mod_time = os.path.getmtime(db_name)
 db_mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db_mod_time))
 num_articles = cursor.execute(f"SELECT COUNT(*) FROM {ARTICLE_TABLE};").fetchone()[0]
 title_page = epub.EpubHtml(title="Title Page", file_name="title_page.xhtml")
 title_html = begin_html_document("Title Page")
+title_html += "<h1>Brikipaedia</h1>"
 title_html += add_paragraph(f"Updated {db_mod_time}")
-title_html += add_paragraph(f"Edition contains {num_articles} articles")
+title_html += add_paragraph(f"This edition contains {num_articles} articles")
 title_html += end_html_document()
 title_page.content = title_html
 book.add_item(title_page)
@@ -170,8 +139,9 @@ while row is not None:
     # Generate article page
     article_page = epub.EpubHtml(title=title, file_name=f"article_{id}.xhtml")
     summary = remove_extra_spaces(row[3])
+    summary_pars = split_into_paragraphs(summary)
     html_str = begin_html_document(title)
-    html_str += add_article(title, [summary])
+    html_str += add_article(title, summary_pars)
     html_str += end_html_document()
     article_page.content = html_str
     book.add_item(article_page)

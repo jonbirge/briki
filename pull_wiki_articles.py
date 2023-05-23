@@ -3,6 +3,7 @@
 import sys
 import re
 import time
+import json
 import sqlite3
 import datetime
 import wikipediaapi
@@ -17,10 +18,18 @@ ARTICLE_TABLE = 'articles'
 
 # Functions
 
+# Use a regular expression to add a space after every period that's
+# followed by a non-space character or a non-digit character
 def clean_summary(text):
-    # Use a regular expression to add a space after every period that's
-    # followed by a non-space character or a non-digit character
     return re.sub(r'\.(?=[^\s\d])', '. ', text)
+
+# Remove extra white space in string.
+def remove_extra_spaces(string):
+    return re.sub(r"\s+", " ", string)
+
+# Take a string with newline characters and return a list of paragraphs.
+def split_into_paragraphs(string):
+    return string.split("\n")
 
 def pull_article(title):
     # Check to see if the title is already in the articles table
@@ -37,16 +46,22 @@ def pull_article(title):
             contents = clean_summary(page.summary)
 
             # Get the current data and time
-            # TODO: Should be the date the article was last updated
             date_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # TODO: Get links to other pages in the see also section, if it exists
-            see_also = ""
+            # Get links to other pages in the 'See also' section, if it exists
+            sections = page.sections
+            see_also_text = ''
+            for s in sections:
+                if s.title == 'See also':
+                    see_also_text = s.text
+                    break
+            see_also = split_into_paragraphs(see_also_text)
+            see_also_json = json.dumps(see_also)
 
             # Insert the title, date_update, contents, see_also, and see_from into the articles table
             cursor.execute('''
                 INSERT INTO articles(title, date_update, contents, see_also)
-                VALUES(?, ?, ?, ?)''', (title, date_update, contents, see_also))
+                VALUES(?, ?, ?, ?)''', (title, date_update, contents, see_also_json))
             conn.commit()
         except Exception as e:
             print("*** Error pulling %s: %s" % (title, e))
