@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import sqlite3
 import sys
 import time
@@ -27,6 +28,9 @@ def begin_html_document(title):
 <body>
     """
 
+def add_article_link(title, id):
+    return f'<p><a href="article_{id}.html">{title}</a></p>'
+
 def add_article(title, content):
     str = f"""
 <article>
@@ -38,13 +42,12 @@ def add_article(title, content):
     """
     return str
 
-def add_article_link(title, id):
-    return f'<p><a href="article_{id}.html">{title}</a></p>'
-
 def add_content_paragraphs(paragraphs):
     str = ""
     for paragraph in paragraphs:
-        str += f"<p>{paragraph}</p>\n"
+        str += f'''
+        <p>{paragraph}<br></p>
+        '''
     return str
 
 def add_paragraph(text):
@@ -53,7 +56,7 @@ def add_paragraph(text):
 def end_html_document():
     return """
 <footer>
-<p>©2023 Briki and others. All rights reserved.</p>
+<p>©2023, all rights reserved.</p>
 </footer>
 </body>
 </html>
@@ -131,6 +134,7 @@ while row is not None:
     if n % 1000 == 0:
         print("Generated %d articles" % n, file=sys.stderr)
 
+
     # Process the row and update index.
     id = row[0]
     title = row[1]
@@ -138,7 +142,7 @@ while row is not None:
 
     # Generate article page
     article_page = epub.EpubHtml(title=title, file_name=f"article_{id}.xhtml")
-    summary = remove_extra_spaces(row[3])
+    summary = row[3]
     summary_pars = split_into_paragraphs(summary)
     html_str = begin_html_document(title)
     html_str += add_article(title, summary_pars)
