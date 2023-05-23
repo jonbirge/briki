@@ -2,6 +2,7 @@
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
 - clean_db.py should be incorporated into pulls
+- If "See Also" link is in db, add link to article
 - Try going for all 50,000 Level 5 articles?
 
 - Web interface
