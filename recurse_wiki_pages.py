@@ -9,18 +9,8 @@ import wikipediaapi
 
 
 ### Parameters
-DEFAULT_PAGES = ["Wikipedia:Vital articles/Level/4/People",
-                "Wikipedia:Vital articles/Level/4/History",
-                "Wikipedia:Vital articles/Level/4/Geography",
-                "Wikipedia:Vital articles/Level/4/Arts",
-                "Wikipedia:Vital articles/Level/4/Philosophy and religion",
-                "Wikipedia:Vital articles/Level/4/Everyday life",
-                "Wikipedia:Vital articles/Level/4/Society and social sciences",
-                "Wikipedia:Vital articles/Level/4/Biological and health sciences",
-                "Wikipedia:Vital articles/Level/4/Physical sciences",
-                "Wikipedia:Vital articles/Level/4/Technology",
-                "Wikipedia:Vital articles/Level/4/Mathematics"]
-DEFAULT_DEPTH = 1
+DEFAULT_PAGES = ["Wikipedia:Vital articles/Level/5"]
+DEFAULT_DEPTH = 2
 THROTTLE_TIME = 0.5
 FILENAME = "wiki_titles"
 
@@ -33,11 +23,11 @@ def remove_extra_spaces(text):
     return re.sub(r'\.(?=[^\s\d])', '. ', text)
 
 def is_good_link(title):
-    # Check if the title is a good title
-    if title.startswith("Wikipedia:Vital"):
-        return True
-    else:
-        return (len(title) > 2 and
+    # Check if the title is a good title for our purposes
+    return title.startswith("Wikipedia:Vital articles/Level/")
+
+def is_good_final_title(title):
+    return (len(title) > 2 and
                 not "(disambiguation)" in title and
                 not title.startswith("Talk:") and
                 not title.startswith("Help:") and
@@ -49,11 +39,8 @@ def is_good_link(title):
                 not title.startswith("Template talk:") and
                 not title.startswith("User talk:") and
                 not title.startswith("Portal:") and
+                not title.startswith("File:") and
                 not title.startswith("Module:"))
-
-def is_good_final_title(title):
-    return (is_good_link(title) and
-            not title.startswith("Wikipedia:"))
 
 def filter_links(links):
     # Filter out titles that are not good links to follow
@@ -78,51 +65,50 @@ def get_linked_titles(wiki_page):
     try:
         if wiki_page.exists():
             for link in wiki_page.links:
-                print("Found link %s" % link, file=sys.stderr)
                 link_titles.append(link)
         else:
             print("*** Warning: %s does not exist." % wiki_page.title, file=sys.stderr)
     except Exception as e:
         print("*** Error pulling links from %s: %s" % (wiki_page, e), file=sys.stderr)
         link_titles = []
-    return filter_links(link_titles)
+    return link_titles
 
 def recurse_page(page, max_depth, depth=0):
     # Recursively get all the linked titles from a page
     # Return a list of all the titles
-    print("Recursing page %s..." % page.title, file=sys.stderr)
+    print("Recursing page %s at depth %d..." % (page.title, depth), file=sys.stderr)
     linked_titles = get_linked_titles(page)
     depth += 1
     if depth < max_depth:
-        for linked_title in linked_titles:
+        output_links = []
+        follow_links = filter_links(linked_titles)
+        for linked_title in follow_links:
             time.sleep(THROTTLE_TIME)
             linked_page = wiki.page(linked_title)
-            linked_titles.extend(recurse_page(linked_page, max_depth, depth))
-    return filter_titles(linked_titles)
+            output_links.extend(recurse_page(linked_page, max_depth, depth))
+        return output_links
+    else:
+        return filter_titles(linked_titles)            
     
 
 ### Main
 
-# Open output file
-output_file = open(FILENAME, 'w')
-
-# Command line handling          
-if len(sys.argv) < 2:
-    start_article = DEFAULT_PAGES
-else:
-    filename = sys.argv[1]
-
 # Get all links from the priority categories
 wiki = wikipediaapi.Wikipedia('en')
 main_article_titles = []
+
 for start_article in DEFAULT_PAGES:
     time.sleep(THROTTLE_TIME)
-    start_article = wiki.page(start_article)
-    main_article_titles.extend(recurse_page(start_article, DEFAULT_DEPTH))
+    start_page = wiki.page(start_article)
+    main_article_titles.extend(recurse_page(start_page, DEFAULT_DEPTH))
 
-# Write all linked article titles to stdout
+# Sort and remove duplicates
+main_article_titles = sorted(list(set(main_article_titles)))
+
+# Open output file and write titles
+output_file = open(FILENAME, 'w')
 for title in main_article_titles:
-    print(title, file=output_file)
+    output_file.write(title + "\n")
 
 # Close output file
 output_file.close()
