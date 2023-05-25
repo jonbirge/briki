@@ -1,7 +1,6 @@
 # EPUB generation
-- Ability to choose db and word list
-- Option to only keep the first paragraph of an article
 - If "See Also" link is in db, add link to article
+- Option to only keep the first paragraph of an article
 
 # Web interface
 - Use Flask backend to serve all related articles

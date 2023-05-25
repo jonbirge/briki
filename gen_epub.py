@@ -13,11 +13,11 @@ from datetime import datetime
 ### Parameters
 ARTICLE_TABLE = "articles"
 DB_FILE = "briki.db"
-
+TITLE_FILE = "level_4_titles.txt"
+# WORD_FILE = "level_5_titles.txt"
 
 ### Functions
 
-# <meta charset="UTF-8">
 def begin_html_document(title):
     return f"""
 <!DOCTYPE html>
@@ -59,9 +59,13 @@ def end_html_document():
     """
 
 # Return a version of "text" with bold HTML tags around ONLY the first instance of "word".
-# Match on any case, but preserve the case of the original word.
 def bold_word(text, word):
-    return re.sub(word, f"<b>{word}</b>", text, flags=re.IGNORECASE, count=1)
+    try:
+        text_out = re.sub(word, f"<b>{word}</b>", text, flags=re.IGNORECASE, count=1)
+    except Exception as e:
+        print("Error bolding word %s: %s" % (word, e), file=sys.stderr)
+        text_out = text
+    return text_out
 
 # Remove any parentheses and their contents from "text"
 def remove_parentheses(text):
@@ -83,14 +87,14 @@ def remove_html_tags(text):
 
 ### Open database
 
-# If no database name is provided, use the default.
+# If no word file is provided, use none.
 if len(sys.argv) != 2:
-    db_name = DB_FILE
+    title_file_name = TITLE_FILE
 else:
-    db_name = sys.argv[1]
+    title_file_name = sys.argv[1]
 
 # Connect to the database.
-conn = sqlite3.connect(db_name)
+conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
 
@@ -109,7 +113,7 @@ book.add_item(style)
 
 book.spine = ["nav"]
 
-db_mod_time = os.path.getmtime(db_name)
+db_mod_time = os.path.getmtime(DB_FILE)
 db_mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db_mod_time))
 num_articles = cursor.execute(f"SELECT COUNT(*) FROM {ARTICLE_TABLE};").fetchone()[0]
 title_page = epub.EpubHtml(title="Title Page", file_name="title_page.xhtml")
@@ -126,8 +130,15 @@ book.toc.append(epub.Link("title_page.xhtml", "Title Page", "title_page"))
 
 ### Add articles
 
-# Read every row from the "articles" table.
-cursor.execute(f"SELECT * FROM {ARTICLE_TABLE};")
+# Read rows from the "articles" table.
+if title_file_name is None:
+    cursor.execute(f"SELECT * FROM {ARTICLE_TABLE};")
+else:
+    title_file = open(title_file_name, "r")
+    titles = title_file.readlines()
+    title_file.close()
+    titles = [title.strip() for title in titles]
+    cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
 
 # Open index.html file for writing.
 index_page = epub.EpubHtml(title="Article Index", file_name="index.xhtml")
@@ -148,17 +159,20 @@ while row is not None:
     index_xhtml += add_index_link(title, id)
 
     # Generate article page
-    article_page = epub.EpubHtml(title=title, file_name=f"article_{id}.xhtml")
-    summary = remove_html_tags(row[3])
-    summary = bold_word(summary, remove_parentheses(title))
-    summary_pars = split_into_paragraphs(summary)
-    html_str = begin_html_document(title)
-    html_str += add_article(title, summary_pars)
-    html_str += end_html_document()
-    article_page.content = html_str
-    book.add_item(article_page)
-    book.spine.append(article_page)
-    book.toc.append(epub.Link(f"article_{id}.xhtml", title, f"article_{id}"))
+    try:
+        article_page = epub.EpubHtml(title=title, file_name=f"article_{id}.xhtml")
+        summary = remove_html_tags(row[3])
+        summary = bold_word(summary, remove_parentheses(title))
+        summary_pars = split_into_paragraphs(summary)
+        html_str = begin_html_document(title)
+        html_str += add_article(title, summary_pars)
+        html_str += end_html_document()
+        article_page.content = html_str
+        book.add_item(article_page)
+        book.spine.append(article_page)
+        book.toc.append(epub.Link(f"article_{id}.xhtml", title, f"article_{id}"))
+    except Exception as e:
+        print("Error generating article %d: %s" % (id, e), file=sys.stderr)
 
     # Fetch the next row
     row = cursor.fetchone()
