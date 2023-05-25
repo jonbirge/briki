@@ -29,8 +29,8 @@ def begin_html_document(title):
 <body>
     """
 
-def add_article_link(title, id):
-    return f'<p><a href="article_{id}.html">{title}</a></p>'
+def add_index_link(title, id):
+    return f'<p><a href="article_{id}.xhtml">{title}</a></p>'
 
 def add_article(title, content):
     str = f"""
@@ -74,6 +74,11 @@ def remove_extra_spaces(string):
 # Take a string with newline characters and return a list of paragraphs.
 def split_into_paragraphs(string):
     return string.split("\n")
+
+# Remove HTML tags using regular expressions
+def remove_html_tags(text):
+    clean_text = re.sub('<.*?>', '', text)
+    return clean_text
 
 
 ### Open database
@@ -140,11 +145,12 @@ while row is not None:
     # Process the row and update index.
     id = row[0]
     title = row[1]
-    index_xhtml += add_article_link(title, id)
+    index_xhtml += add_index_link(title, id)
 
     # Generate article page
     article_page = epub.EpubHtml(title=title, file_name=f"article_{id}.xhtml")
-    summary = bold_word(row[3], remove_parentheses(title))
+    summary = remove_html_tags(row[3])
+    summary = bold_word(summary, remove_parentheses(title))
     summary_pars = split_into_paragraphs(summary)
     html_str = begin_html_document(title)
     html_str += add_article(title, summary_pars)
@@ -160,13 +166,15 @@ while row is not None:
 # Finish the index file.
 index_xhtml += end_html_document()
 index_page.content = index_xhtml
-book.add_item(index_page)
-book.spine.append(index_page)
-book.toc.append(epub.Link("index.xhtml", "Index", "index"))
+#book.add_item(index_page)
+#book.spine.append(index_page)
+#book.toc.append(epub.Link("index.xhtml", "Index", "index"))
 
 
 ### Finish book
 
 print("Generating epub navigation...", file=sys.stderr)
+book.add_item(epub.EpubNcx())
+book.add_item(epub.EpubNav())
 print("Writing epub file...", file=sys.stderr)
 epub.write_epub("brikipaedia.epub", book)
