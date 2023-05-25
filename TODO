@@ -1,17 +1,19 @@
-- Extract reference graph from "See Also" links, and maybe textual links
+# EPUB generation
+- If "See Also" link is in db, add link to article
+
+# Web interface
+- Use Flask backend to serve all related articles
+- Use "See Also" to load related articles
+- Script to go back through database and replace links with table references
 - Function to re-crawl Wikipedia and update outdated articles in db
     - Allow for a "force" option to re-crawl all articles
     - Allow for definition of a "stale" period
-- clean_db.py should be incorporated into pulls
+- Allow for setting depth of related articles
+- Allowing sharing to e-mail, OneNote, PDF or EPUB, including send to Kindle
+- Mobile version with embedded database?
+- Primr.io: Get smart quick, anywhere
+- Run web, crawler and db in separate containers
 
-- Web interface
-    - Use Flask backend to serve all related articles
-    - Use "See Also" to load related articles
-    - Allow for setting depth of related articles
-    - Allowing sharing to e-mail, OneNote, PDF or EPUB, including send to Kindle
-    - Primr.io: Get smart quick, anywhere
-    - Mobile version with embedded database?
-
-- LLM interface
-    - Integrate with GPT-2 with local keyword search to allow natural-language interaction
-    - Similar to above but with all local man pages on a Unix system
+# LLM interface
+- Integrate with GPT-2 with local keyword search to allow natural-language interaction
+- Similar to above but with all local man pages on a Unix system
