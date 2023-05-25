@@ -1,4 +1,6 @@
 # EPUB generation
+- Ability to choose db and word list
+- Option to only keep the first paragraph of an article
 - If "See Also" link is in db, add link to article
 
 # Web interface
