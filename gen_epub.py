@@ -140,11 +140,6 @@ else:
     titles = [title.strip() for title in titles]
     cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
 
-# Open index.html file for writing.
-index_page = epub.EpubHtml(title="Article Index", file_name="index.xhtml")
-index_xhtml = begin_html_document("Index of articles")
-index_xhtml += "<h1>Index of articles</h1>"
-
 # Read from the standard input, one line at a time.
 n = 0
 row = cursor.fetchone()
@@ -156,7 +151,6 @@ while row is not None:
     # Process the row and update index.
     id = row[0]
     title = row[1]
-    index_xhtml += add_index_link(title, id)
 
     # Generate article page
     try:
@@ -176,13 +170,6 @@ while row is not None:
 
     # Fetch the next row
     row = cursor.fetchone()
-
-# Finish the index file.
-index_xhtml += end_html_document()
-index_page.content = index_xhtml
-#book.add_item(index_page)
-#book.spine.append(index_page)
-#book.toc.append(epub.Link("index.xhtml", "Index", "index"))
 
 
 ### Finish book
