@@ -20,7 +20,18 @@ conn = sqlite3.connect(DB_FILE)
 main_cursor = conn.cursor()
 cursor = conn.cursor()
 
+# Create an index on the "title" column of the "articles" table, if it doesn't already exist.
+# First, check to see if the index already exists.
+main_cursor.execute(f"SELECT name FROM sqlite_master WHERE type='index' AND name='{ARTICLE_TABLE}_title';")
+row = main_cursor.fetchone()
+if row is None:
+    # The index doesn't exist, so create it.
+    print("Creating index for %s.title" % ARTICLE_TABLE, file=sys.stderr)
+    main_cursor.execute(f"CREATE INDEX IF NOT EXISTS {ARTICLE_TABLE}_title ON {ARTICLE_TABLE} (title);")
+    conn.commit()
+
 # Read rows from the "articles" table.
+print("Reading articles from %s..." % DB_FILE, file=sys.stderr)
 main_cursor.execute(f"SELECT * FROM {ARTICLE_TABLE};")
 
 # Read the database one row at a time.
