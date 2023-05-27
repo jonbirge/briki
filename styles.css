@@ -1,7 +1,42 @@
-h1 {
-    margin: 20px 0;
+/* Reset default margins and padding */
+body,
+h1,
+h2,
+p,
+ref {
+    margin: 0;
+    padding: 0;
 }
 
-p {
+/* Apply classic serif font to everything */
+body {
+    font-family: serif;
+}
+
+/* Set font sizes for headings */
+h1 {
+    font-size: x-large;
     margin: 10px 0;
+}
+
+h2 {
+    font-size: larger;
+    margin: 6px 0;
+}
+
+/* Styling for <ref> tag */
+ref {
+    font-size: medium;
+}
+
+/* Add small space between paragraphs */
+p {
+    margin-bottom: 10px;
+    font-size: medium;
+}
+
+/* Styling for ref links */
+ref a {
+    color: black;
+    text-decoration: underline;
 }

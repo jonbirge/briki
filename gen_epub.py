@@ -11,6 +11,7 @@ from datetime import datetime
 
 
 ### Parameters
+MAX_ARTICLES = 100
 ARTICLE_TABLE = "articles"
 DB_FILE = "briki.db"
 TITLE_FILE = "level_4_titles.txt"
@@ -23,40 +24,55 @@ def begin_html_document(title):
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="stylesheet" type="text/css" href="styles.css">
 <title>{title}</title>
 </head>
 <body>
     """
-
-def add_index_link(title, id):
-    return f'<p><a href="article_{id}.xhtml">{title}</a></p>'
 
 def add_article(title, content):
     str = f"""
 <h1>{title}</h1>
     """
     str += add_content_paragraphs(content)
-    str += """
-    """
     return str
 
 def add_content_paragraphs(paragraphs):
     str = ""
     for paragraph in paragraphs:
         str += f'''
-        <p>{paragraph}</p>
+<p>{paragraph}</p>
         '''
     return str
 
 def add_paragraph(text):
     return f"<p>{text}</p>"
 
+def add_ref_link(title, id):
+    return f'<a href="article_{id}.xhtml"><b>{title}</b></a>'
+
+def add_see_also(see_also):
+    ref_list = []
+    for link_tuple in see_also:
+        if link_tuple[0] in titles:
+            ref_list.append(link_tuple)
+    if len(ref_list) > 0:
+        str = '''
+<h2>See also:</h2>
+<ref>'''
+        for link_tuple in ref_list:
+            str += add_ref_link(link_tuple[0], link_tuple[1])
+            if link_tuple != ref_list[-1]:
+                str += ", "
+        str += '</ref>'
+        return str
+    else:
+        return ""
+
 def end_html_document():
-    return """
+    return '''
 </body>
 </html>
-    """
+    '''
 
 # Return a version of "text" with bold HTML tags around ONLY the first instance of "word".
 def bold_word(text, word):
@@ -108,10 +124,10 @@ book.set_language("en")
 book.add_author("Jonathan Birge")
 
 css = open("styles.css").read()
-style = epub.EpubItem(uid='style_css', file_name='style.css', media_type='text/css', content=css)
+style = epub.EpubItem(uid='style', file_name='styles.css', media_type='text/css', content=css)
 book.add_item(style)
 
-book.spine = ["nav"]
+# book.spine = ["nav"]
 
 db_mod_time = os.path.getmtime(DB_FILE)
 db_mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db_mod_time))
@@ -131,19 +147,16 @@ book.toc.append(epub.Link("title_page.xhtml", "Title Page", "title_page"))
 ### Add articles
 
 # Read rows from the "articles" table.
-if title_file_name is None:
-    cursor.execute(f"SELECT * FROM {ARTICLE_TABLE};")
-else:
-    title_file = open(title_file_name, "r")
-    titles = title_file.readlines()
-    title_file.close()
-    titles = [title.strip() for title in titles]
-    cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
+title_file = open(title_file_name, "r")
+titles = title_file.readlines()
+title_file.close()
+titles = [title.strip() for title in titles]
+cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
 
 # Read from the standard input, one line at a time.
 n = 0
 row = cursor.fetchone()
-while row is not None:
+while row is not None and n < MAX_ARTICLES:
     n += 1
     if n % 1000 == 0:
         print("Generated %d articles" % n, file=sys.stderr)
@@ -151,6 +164,7 @@ while row is not None:
     # Process the row and update index.
     id = row[0]
     title = row[1]
+    see_also = json.loads(row[4])
 
     # Generate article page
     try:
@@ -160,9 +174,11 @@ while row is not None:
         summary_pars = split_into_paragraphs(summary)
         html_str = begin_html_document(title)
         html_str += add_article(title, summary_pars)
+        html_str += add_see_also(see_also)
         html_str += end_html_document()
         article_page.content = html_str
         book.add_item(article_page)
+        article_page.add_link(href="styles.css", rel="stylesheet", type="text/css")
         book.spine.append(article_page)
         book.toc.append(epub.Link(f"article_{id}.xhtml", title, f"article_{id}"))
     except Exception as e:
