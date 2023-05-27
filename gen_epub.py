@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 ### Parameters
-MAX_ARTICLES = 100
+MAX_ARTICLES = 100000
 ARTICLE_TABLE = "articles"
 DB_FILE = "briki.db"
 TITLE_FILE = "level_4_titles.txt"
@@ -58,12 +58,12 @@ def add_see_also(see_also):
     if len(ref_list) > 0:
         str = '''
 <h2>See also:</h2>
-<ref>'''
+<p>'''
         for link_tuple in ref_list:
             str += add_ref_link(link_tuple[0], link_tuple[1])
             if link_tuple != ref_list[-1]:
                 str += ", "
-        str += '</ref>'
+        str += '</p>'
         return str
     else:
         return ""
@@ -126,8 +126,6 @@ book.add_author("Jonathan Birge")
 css = open("styles.css").read()
 style = epub.EpubItem(uid='style', file_name='styles.css', media_type='text/css', content=css)
 book.add_item(style)
-
-# book.spine = ["nav"]
 
 db_mod_time = os.path.getmtime(DB_FILE)
 db_mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db_mod_time))

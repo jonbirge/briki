@@ -1,8 +1,7 @@
-# EPUB generation
+## EPUB generation
 - If "See Also" link is in title list, add link to article
-- Option to only keep the first paragraph of an article
 
-# Web interface
+## Web interface
 - Use Flask backend to serve all related articles
 - Use "See Also" to load related articles
 - Script to go back through database and replace links with table references
@@ -15,6 +14,6 @@
 - Primr.io: Get smart quick, anywhere
 - Run web, crawler and db in separate containers
 
-# LLM interface
+## LLM interface
 - Integrate with GPT-2 with local keyword search to allow natural-language interaction
 - Similar to above but with all local man pages on a Unix system

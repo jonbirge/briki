@@ -1,9 +1,5 @@
 /* Reset default margins and padding */
-body,
-h1,
-h2,
-p,
-ref {
+body, h1, h2, p {
     margin: 0;
     padding: 0;
 }
@@ -24,19 +20,8 @@ h2 {
     margin: 6px 0;
 }
 
-/* Styling for <ref> tag */
-ref {
-    font-size: medium;
-}
-
 /* Add small space between paragraphs */
 p {
     margin-bottom: 10px;
     font-size: medium;
-}
-
-/* Styling for ref links */
-ref a {
-    color: black;
-    text-decoration: underline;
 }
