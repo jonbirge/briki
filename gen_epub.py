@@ -7,7 +7,6 @@ import time
 import os
 import re
 from ebooklib import epub
-from datetime import datetime
 
 
 ### Parameters
@@ -36,7 +35,7 @@ def add_article(title, content):
     str += add_content_paragraphs(content)
     return str
 
-def add_content_paragraphs(paragraphs):
+def add_content_paragraphs(paragraphs: list):
     str = ""
     for paragraph in paragraphs:
         str += f'''
@@ -47,10 +46,10 @@ def add_content_paragraphs(paragraphs):
 def add_paragraph(text):
     return f"<p>{text}</p>"
 
-def add_ref_link(title, id):
+def add_ref_link(title, id: int):
     return f'<a href="article_{id}.xhtml"><b>{title}</b></a>'
 
-def add_see_also(see_also):
+def add_see_also(see_also: list):
     ref_list = []
     for link_tuple in see_also:
         if link_tuple[0] in titles:
@@ -75,7 +74,7 @@ def end_html_document():
     '''
 
 # Return a version of "text" with bold HTML tags around ONLY the first instance of "word".
-def bold_word(text, word):
+def bold_word(text: str, word: str):
     try:
         text_out = re.sub(word, f"<b>{word}</b>", text, flags=re.IGNORECASE, count=1)
     except Exception as e:
@@ -84,52 +83,57 @@ def bold_word(text, word):
     return text_out
 
 # Remove any parentheses and their contents from "text"
-def remove_parentheses(text):
+def remove_parentheses(text: str):
     return re.sub(r"\(.*?\)", "", text)
 
 # Remove extra white space in string.
-def remove_extra_spaces(string):
-    return re.sub(r"\s+", " ", string)
+def remove_extra_spaces(text: str):
+    return re.sub(r"\s+", " ", text)
 
 # Take a string with newline characters and return a list of paragraphs.
-def split_into_paragraphs(string):
-    return string.split("\n")
+def split_into_paragraphs(text: str):
+    return text.split("\n")
 
-# Remove HTML tags using regular expressions
-def remove_html_tags(text):
+# Remove HTML tags
+def remove_html_tags(text: str):
     clean_text = re.sub('<.*?>', '', text)
     return clean_text
 
 
-### Open database
+### Main
 
-# If no word file is provided, use none.
+## Connect to the database.
+conn = sqlite3.connect(DB_FILE)
+cursor = conn.cursor()
+
+# If no word file is provided, use default.
 if len(sys.argv) != 2:
     title_file_name = TITLE_FILE
 else:
     title_file_name = sys.argv[1]
 
-# Connect to the database.
-conn = sqlite3.connect(DB_FILE)
-cursor = conn.cursor()
-
-
-### Create epub book
-
+## Create epub book
 book = epub.EpubBook()
-
 book.set_identifier("id123456")
 book.set_title("Brikipaedia")
 book.set_language("en")
 book.add_author("Jonathan Birge")
 
+# Add CSS file
 css = open("styles.css").read()
 style = epub.EpubItem(uid='style', file_name='styles.css', media_type='text/css', content=css)
 book.add_item(style)
 
+# Read rows from the "articles" table.
+title_file = open(title_file_name, "r")
+titles = title_file.readlines()
+title_file.close()
+titles = [title.strip() for title in titles]
+
+# Add title page
 db_mod_time = os.path.getmtime(DB_FILE)
 db_mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db_mod_time))
-num_articles = cursor.execute(f"SELECT COUNT(*) FROM {ARTICLE_TABLE};").fetchone()[0]
+num_articles = len(titles)
 title_page = epub.EpubHtml(title="Title Page", file_name="title_page.xhtml")
 title_html = begin_html_document("Title Page")
 title_html += "<h1>Brikipaedia</h1>"
@@ -141,28 +145,20 @@ book.add_item(title_page)
 book.spine.append(title_page)
 book.toc.append(epub.Link("title_page.xhtml", "Title Page", "title_page"))
 
+## Add articles
 
-### Add articles
-
-# Read rows from the "articles" table.
-title_file = open(title_file_name, "r")
-titles = title_file.readlines()
-title_file.close()
-titles = [title.strip() for title in titles]
-cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
 
 # Read from the standard input, one line at a time.
 n = 0
+cursor.execute(f"SELECT * FROM {ARTICLE_TABLE} WHERE title IN ({','.join('?' for _ in titles)});", titles)
 row = cursor.fetchone()
 while row is not None and n < MAX_ARTICLES:
     n += 1
     if n % 1000 == 0:
         print("Generated %d articles" % n, file=sys.stderr)
 
-    # Process the row and update index.
     id = row[0]
     title = row[1]
-    see_also = json.loads(row[4])
 
     # Generate article page
     try:
@@ -170,6 +166,7 @@ while row is not None and n < MAX_ARTICLES:
         summary = remove_html_tags(row[3])
         summary = bold_word(summary, remove_parentheses(title))
         summary_pars = split_into_paragraphs(summary)
+        see_also = json.loads(row[4])
         html_str = begin_html_document(title)
         html_str += add_article(title, summary_pars)
         html_str += add_see_also(see_also)
@@ -185,9 +182,7 @@ while row is not None and n < MAX_ARTICLES:
     # Fetch the next row
     row = cursor.fetchone()
 
-
-### Finish book
-
+## Finish book
 print("Generating epub navigation...", file=sys.stderr)
 book.add_item(epub.EpubNcx())
 book.add_item(epub.EpubNav())

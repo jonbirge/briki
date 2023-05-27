@@ -1,6 +1,3 @@
-## EPUB generation
-- If "See Also" link is in title list, add link to article
-
 ## Web interface
 - Use Flask backend to serve all related articles
 - Use "See Also" to load related articles
