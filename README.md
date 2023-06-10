@@ -11,7 +11,7 @@ To run, you need to have Python 3 installed. Then, you can run the following com
     ./process_db_refs.py
     ./gen_epub.py
 
-Note that the first script will take a very long time, as it will download the summary of around 50,000 Wikipedia articles and load them into an SQL database. The second script goes through the database and replaces links with SQL table IDs to speed-up subsequent operations. The third function will generate an EPUB file with the articles from a list of titles, defaulting to the list in `level_4_titles.txt`.
+Note that the first script will take a very long time, as it will download the summary of around 10,000 Wikipedia articles and load them into an SQL database. The second script goes through the database and replaces links with SQL table IDs to speed-up subsequent operations. The third function will generate an EPUB file with the articles.
 
 ## Why?
 I decided to do this because I have found myself in situations with poor internet connectivity while reading a book and wanted to look stuff up for background.

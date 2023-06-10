@@ -11,7 +11,7 @@ import wikipediaapi
 
 ### Parameters
 THROTTLE_TIME = 0.5
-ARTICLE_LIST_FILE = 'wiki_titles'
+DEFAULT_ARTICLE_LIST = 'level_4_titles.txt'  # default to short list of titles
 DB_FILE = 'briki.db'
 ARTICLE_TABLE = 'articles'
 
@@ -73,12 +73,12 @@ def pull_article(title):
 
 # Command line handling          
 if len(sys.argv) < 2:
-    filename = "wiki_titles"
+    filename = DEFAULT_ARTICLE_LIST
 else:
     filename = sys.argv[1]
 
 # Connect to SQLite database
-conn = sqlite3.connect('briki.db')
+conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
 # Check to see if articles table exists and if it doesn't create it...

@@ -11,10 +11,10 @@ from ebooklib import epub
 
 ### Parameters
 MAX_ARTICLES = 100000
-ARTICLE_TABLE = "articles"
 DB_FILE = "briki.db"
 TITLE_FILE = "level_4_titles.txt"
-# WORD_FILE = "level_5_titles.txt"
+# TITLE_FILE = "level_5_titles.txt"
+ARTICLE_TABLE = "articles"
 
 ### Functions
 
